@@ -43,9 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           setSupabaseUser(session.user)
           await fetchUserProfile(session.user.id)
-          
-          // Save session for launcher if launched from launcher
-          await saveLauncherSession(session, session.user.id)
         } else {
           setSupabaseUser(null)
           setUser(null)
@@ -68,6 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (data) {
       setUser(data)
+      
+      // Save session for launcher after user profile is loaded
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        await saveLauncherSession(session, userId)
+      }
     } else if (error) {
       console.error('Error fetching user profile:', error)
     }
@@ -78,23 +81,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const urlParams = new URLSearchParams(window.location.search)
     const isFromLauncher = urlParams.get('launcher') === 'true'
     
-    if (isFromLauncher && user) {
+    if (isFromLauncher && session && user) {
       const launcherSession = {
         access_token: session.access_token,
         refresh_token: session.refresh_token,
-        expires_at: Date.now() + (session.expires_in * 1000),
+        expires_at: Date.now() + ((session.expires_in || 3600) * 1000),
         user: {
           id: user.id,
-          name: user.name || 'ASTRAL User',
-          email: user.email || '',
-          avatar_url: user.avatar_url,
+          name: user.name || session.user?.user_metadata?.name || 'ASTRAL User',
+          email: user.email || session.user?.email || '',
+          avatar_url: user.avatar_url || session.user?.user_metadata?.avatar_url,
           subscription_tier: 'free', // Default tier
-          created_at: user.created_at
+          created_at: user.created_at || new Date().toISOString()
         }
       }
       
       localStorage.setItem('astral-session', JSON.stringify(launcherSession))
-      console.log('✅ Saved launcher session')
+      console.log('✅ Saved launcher session:', launcherSession)
+      
+      // Show success message for launcher users
+      setTimeout(() => {
+        alert('✅ Login successful! You can now return to the launcher.')
+      }, 1000)
     }
   }
 
