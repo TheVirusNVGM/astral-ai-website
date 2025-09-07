@@ -22,6 +22,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const fetchUserProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (data) {
+      setUser(data)
+      console.log('👤 User profile loaded:', data)
+      
+      // Save session for launcher after user profile is loaded
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔑 Session for launcher:', session)
+      if (session) {
+        await saveLauncherSession(session, userId)
+      }
+    } else {
+      console.log('⚠️ User profile not found, creating new one...')
+      // User doesn't exist, create one
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      
+      if (authUser) {
+        const newUser = {
+          id: authUser.id,
+          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || 'User',
+          email: authUser.email || '',
+          avatar_url: authUser.user_metadata?.avatar_url,
+          created_at: new Date().toISOString()
+        }
+        
+        const { data: createdUser } = await supabase
+          .from('users')
+          .insert([newUser])
+          .select()
+          .single()
+          
+        if (createdUser) {
+          setUser(createdUser)
+          console.log('✅ User profile created:', createdUser)
+          
+          // Save session for launcher after user profile is created
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) {
+            await saveLauncherSession(session, userId)
+          }
+        }
+      }
+    }
+  }
+
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
@@ -54,62 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [fetchUserProfile])
 
-  const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
 
-    if (data) {
-      setUser(data)
-      console.log('👤 User profile loaded:', data)
-      
-      // Save session for launcher after user profile is loaded
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('🔑 Session for launcher:', session)
-      if (session) {
-        await saveLauncherSession(session, userId)
-      }
-    } else {
-      console.log('⚠️ User profile not found, creating new one...')
-      // User doesn't exist, create one
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      
-      if (authUser) {
-        const newUser = {
-          id: authUser.id,
-          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || 'User',
-          email: authUser.email || '',
-          avatar_url: authUser.user_metadata?.avatar_url,
-          created_at: new Date().toISOString()
-        }
-        
-        const { data: createdUser, error: createError } = await supabase
-          .from('users')
-          .insert([newUser])
-          .select()
-          .single()
-          
-        if (createdUser) {
-          setUser(createdUser)
-          console.log('✅ User profile created:', createdUser)
-          
-          // Save session for launcher after user profile is created
-          const { data: { session } } = await supabase.auth.getSession()
-          if (session) {
-            await saveLauncherSession(session, userId)
-          }
-        } else {
-          console.error('❌ Error creating user profile:', createError)
-        }
-      }
-    }
-  }
-
-  const saveLauncherSession = async (session: any, userId: string) => {
+  const saveLauncherSession = async (session: unknown, userId: string) => {
     // Check if launched from launcher
     const urlParams = new URLSearchParams(window.location.search)
     const isFromLauncher = urlParams.get('launcher') === 'true'
