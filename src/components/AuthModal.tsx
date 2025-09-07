@@ -34,7 +34,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose()
         resetForm()
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)

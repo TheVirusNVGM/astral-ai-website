@@ -9,10 +9,10 @@ interface AuthContextType {
   user: User | null
   supabaseUser: SupabaseUser | null
   loading: boolean
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>
-  signIn: (email: string, password: string) => Promise<{ error: any }>
+  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
-  signInWithProvider: (provider: 'discord') => Promise<{ error: any }>
+  signInWithProvider: (provider: 'discord') => Promise<{ error: Error | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
