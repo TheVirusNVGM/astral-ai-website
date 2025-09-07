@@ -65,9 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (data) {
       setUser(data)
+      console.log('👤 User profile loaded:', data)
       
       // Save session for launcher after user profile is loaded
       const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔑 Session for launcher:', session)
       if (session) {
         await saveLauncherSession(session, userId)
       }
@@ -80,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if launched from launcher
     const urlParams = new URLSearchParams(window.location.search)
     const isFromLauncher = urlParams.get('launcher') === 'true'
+    
+    console.log('🔍 saveLauncherSession called:', { isFromLauncher, hasSession: !!session, hasUser: !!user, userId })
     
     if (isFromLauncher && session && user) {
       const launcherSession = {
