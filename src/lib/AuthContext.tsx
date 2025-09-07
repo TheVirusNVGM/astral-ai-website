@@ -105,10 +105,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [fetchUserProfile])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
 
-  const saveLauncherSession = async (session: unknown, userId: string) => {
+  const saveLauncherSession = async (session: { access_token?: string; refresh_token?: string; expires_in?: number; user?: { user_metadata?: { name?: string; avatar_url?: string }; email?: string } } | null, userId: string) => {
     // Check if launched from launcher
     const urlParams = new URLSearchParams(window.location.search)
     const isFromLauncher = urlParams.get('launcher') === 'true'
@@ -117,15 +118,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (isFromLauncher && session && user) {
       const launcherSession = {
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
+        access_token: session.access_token || '',
+        refresh_token: session.refresh_token || '',
         expires_at: Date.now() + ((session.expires_in || 3600) * 1000),
         user: {
           id: user.id,
           name: user.name || session.user?.user_metadata?.name || 'ASTRAL User',
           email: user.email || session.user?.email || '',
           avatar_url: user.avatar_url || session.user?.user_metadata?.avatar_url,
-          subscription_tier: 'free', // Default tier
+          subscription_tier: 'free' as const, // Default tier
           created_at: user.created_at || new Date().toISOString()
         }
       }
