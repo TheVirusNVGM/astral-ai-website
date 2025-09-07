@@ -43,9 +43,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           setSupabaseUser(session.user)
           await fetchUserProfile(session.user.id)
+          
+          // Save session for launcher if launched from launcher
+          await saveLauncherSession(session, session.user.id)
         } else {
           setSupabaseUser(null)
           setUser(null)
+          // Clear launcher session
+          clearLauncherSession()
         }
         setLoading(false)
       }
@@ -66,6 +71,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else if (error) {
       console.error('Error fetching user profile:', error)
     }
+  }
+
+  const saveLauncherSession = async (session: any, userId: string) => {
+    // Check if launched from launcher
+    const urlParams = new URLSearchParams(window.location.search)
+    const isFromLauncher = urlParams.get('launcher') === 'true'
+    
+    if (isFromLauncher && user) {
+      const launcherSession = {
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_at: Date.now() + (session.expires_in * 1000),
+        user: {
+          id: user.id,
+          name: user.name || 'ASTRAL User',
+          email: user.email || '',
+          avatar_url: user.avatar_url,
+          subscription_tier: 'free', // Default tier
+          created_at: user.created_at
+        }
+      }
+      
+      localStorage.setItem('astral-session', JSON.stringify(launcherSession))
+      console.log('✅ Saved launcher session')
+    }
+  }
+
+  const clearLauncherSession = () => {
+    localStorage.removeItem('astral-session')
+    console.log('🗑️ Cleared launcher session')
   }
 
   const signUp = async (email: string, password: string, name: string) => {
