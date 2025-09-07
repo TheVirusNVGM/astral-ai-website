@@ -73,8 +73,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session) {
         await saveLauncherSession(session, userId)
       }
-    } else if (error) {
-      console.error('Error fetching user profile:', error)
+    } else {
+      console.log('⚠️ User profile not found, creating new one...')
+      // User doesn't exist, create one
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      
+      if (authUser) {
+        const newUser = {
+          id: authUser.id,
+          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || 'User',
+          email: authUser.email || '',
+          avatar_url: authUser.user_metadata?.avatar_url,
+          created_at: new Date().toISOString()
+        }
+        
+        const { data: createdUser, error: createError } = await supabase
+          .from('users')
+          .insert([newUser])
+          .select()
+          .single()
+          
+        if (createdUser) {
+          setUser(createdUser)
+          console.log('✅ User profile created:', createdUser)
+          
+          // Save session for launcher after user profile is created
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) {
+            await saveLauncherSession(session, userId)
+          }
+        } else {
+          console.error('❌ Error creating user profile:', createError)
+        }
+      }
     }
   }
 
