@@ -1,5 +1,6 @@
 'use client'
 
+// Force redeploy - updated ESLint fixes
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
