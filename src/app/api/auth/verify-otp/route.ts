@@ -41,11 +41,11 @@ export async function POST(request: NextRequest) {
       console.warn('Unknown client verifying OTP:', client_id)
     }
 
-    // Verify the confirm-signup OTP (email code)
+    // Verify OTP using Supabase
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token,
-      type: 'signup',
+      type: 'email'
     })
 
     if (error) {

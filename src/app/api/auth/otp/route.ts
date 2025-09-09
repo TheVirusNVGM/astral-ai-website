@@ -34,54 +34,33 @@ export async function POST(request: NextRequest) {
       console.warn('Unknown client requesting OTP:', client_id)
     }
 
-    // Prefer Confirm Signup flow (email OTP code) instead of Magic Link.
-    // Try to sign up the user; Supabase will send the Confirm Signup email with {{ .Token }}.
-    const { data, error } = await supabase.auth.signUp({
+    // Use signInWithOtp but with channel 'email' to force OTP instead of magic link
+    const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: undefined,
+        shouldCreateUser: true,
+        channel: 'email', // Forces email OTP instead of magic link
       },
     })
 
     if (error) {
-      // If user already registered, fall back to resending the confirmation email (still OTP-style if unconfirmed)
-      const msg = String(error.message || '')
-      if (msg.includes('User already registered')) {
-        // Attempt to re-send confirmation email to existing but unconfirmed users
-        try {
-          const { error: resendErr } = await supabase.auth.resend({
-            type: 'signup',
-            email,
-          })
-          if (resendErr) {
-            console.error('Supabase resend(signup) error:', resendErr)
-            return NextResponse.json(
-              { error: 'Failed to resend verification code' },
-              { status: 500, headers: corsHeaders }
-            )
-          }
-        } catch (resendCatch) {
-          console.error('Resend catch error:', resendCatch)
-          return NextResponse.json(
-            { error: 'Failed to resend verification code' },
-            { status: 500, headers: corsHeaders }
-          )
-        }
-      } else if (msg.includes('rate limit')) {
+      console.error('Supabase OTP error:', error)
+      
+      // Handle specific errors
+      if (error.message.includes('rate limit')) {
         return NextResponse.json(
           { error: 'Too many requests. Please wait before trying again.' },
           { status: 429, headers: corsHeaders }
         )
-      } else {
-        console.error('Supabase signUp error:', error)
-        return NextResponse.json(
-          { error: 'Failed to send verification code' },
-          { status: 500, headers: corsHeaders }
-        )
       }
+      
+      return NextResponse.json(
+        { error: 'Failed to send verification code' },
+        { status: 500, headers: corsHeaders }
+      )
     }
 
-    console.log('✅ Confirm signup email (OTP) sent to:', email)
+    console.log('✅ OTP sent successfully to:', email)
 
     return NextResponse.json(
       {
