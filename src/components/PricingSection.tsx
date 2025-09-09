@@ -45,12 +45,12 @@ export default function PricingSection() {
                 border border-cosmic-purple-200/40 hover:border-cosmic-purple-100 
                 bg-gradient-to-br from-white/10 to-white/5 
                 shadow-[0_0_18px_rgba(168,85,247,0.18)] hover:shadow-[0_0_28px_rgba(168,85,247,0.35)]
-                ${plan.popular ? 'ring-2 ring-cosmic-purple-200' : ''}
+                ${plan.popular ? 'ring-1 ring-cosmic-purple-200' : ''}
               `}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="px-4 py-2 bg-cosmic-purple-200 text-white text-sm font-semibold rounded-full whitespace-nowrap">
+                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
+                  <div className="px-3 py-1 bg-cosmic-purple-200 text-white text-xs font-semibold rounded-full whitespace-nowrap">
                     Most Popular
                   </div>
                 </div>
@@ -70,10 +70,10 @@ export default function PricingSection() {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 
+              <button className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 focus:outline-none active:scale-95
                 ${plan.popular 
                   ? 'bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white shadow-[0_0_18px_rgba(168,85,247,0.25)] hover:shadow-[0_0_28px_rgba(168,85,247,0.45)]' 
-                  : 'bg-white/10 hover:bg-white/20 text-white border border-cosmic-purple-200/50 hover:border-cosmic-purple-100'}
+                  : 'bg-white/10 hover:bg-white/20 text-white'}
               `}>
                 {plan.name === 'Free' ? 'Download Free' : `Start ${plan.name}`}
               </button>
