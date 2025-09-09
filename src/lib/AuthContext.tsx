@@ -14,6 +14,9 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   signInWithProvider: (provider: 'discord') => Promise<{ error: Error | null }>
+  // OTP methods
+  signInWithOTP: (email: string) => Promise<{ error: Error | null }>
+  verifyOTP: (email: string, otp: string) => Promise<{ error: Error | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -384,6 +387,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
+  const signInWithOTP = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true
+      }
+    })
+
+    return { error }
+  }
+
+  const verifyOTP = async (email: string, otp: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: 'email'
+    })
+
+    return { error }
+  }
+
   const value = {
     user,
     supabaseUser,
@@ -391,7 +415,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signIn,
     signOut,
-    signInWithProvider
+    signInWithProvider,
+    signInWithOTP,
+    verifyOTP
   }
 
   return (
