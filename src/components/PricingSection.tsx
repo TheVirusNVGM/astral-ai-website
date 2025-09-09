@@ -36,7 +36,18 @@ export default function PricingSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
-            <div key={index} className={`relative p-8 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm ${plan.popular ? 'ring-2 ring-cosmic-purple-200' : ''}`}>
+            <div
+              key={index}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select ${plan.name} plan`}
+              className={`relative p-8 rounded-2xl backdrop-blur-xl cursor-pointer group transition-all duration-300 focus:outline-none 
+                border border-cosmic-purple-200/40 hover:border-cosmic-purple-100 
+                bg-gradient-to-br from-white/10 to-white/5 
+                shadow-[0_0_18px_rgba(168,85,247,0.18)] hover:shadow-[0_0_28px_rgba(168,85,247,0.35)]
+                ${plan.popular ? 'ring-2 ring-cosmic-purple-200' : ''}
+              `}
+            >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <div className="px-4 py-2 bg-cosmic-purple-200 text-white text-sm font-semibold rounded-full">
@@ -45,7 +56,7 @@ export default function PricingSection() {
                 </div>
               )}
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-cosmic-purple-100 transition-colors">{plan.name}</h3>
                 <div className="flex items-baseline justify-center mb-2">
                   <span className="text-4xl font-bold text-cosmic-purple-100">{plan.price}</span>
                   <span className="text-white/70 ml-2">/{plan.period}</span>
@@ -59,7 +70,11 @@ export default function PricingSection() {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${plan.popular ? 'bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white' : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'}`}>
+              <button className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 
+                ${plan.popular 
+                  ? 'bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white shadow-[0_0_18px_rgba(168,85,247,0.25)] hover:shadow-[0_0_28px_rgba(168,85,247,0.45)]' 
+                  : 'bg-white/10 hover:bg-white/20 text-white border border-cosmic-purple-200/40 hover:border-cosmic-purple-100'}
+              `}>
                 {plan.name === 'Free' ? 'Download Free' : `Start ${plan.name}`}
               </button>
             </div>
