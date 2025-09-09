@@ -49,8 +49,8 @@ export default function PricingSection() {
               `}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="px-4 py-2 bg-cosmic-purple-200 text-white text-sm font-semibold rounded-full">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                  <div className="px-4 py-2 bg-cosmic-purple-200 text-white text-sm font-semibold rounded-full whitespace-nowrap">
                     Most Popular
                   </div>
                 </div>
@@ -73,7 +73,7 @@ export default function PricingSection() {
               <button className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 
                 ${plan.popular 
                   ? 'bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white shadow-[0_0_18px_rgba(168,85,247,0.25)] hover:shadow-[0_0_28px_rgba(168,85,247,0.45)]' 
-                  : 'bg-white/10 hover:bg-white/20 text-white border border-cosmic-purple-200/40 hover:border-cosmic-purple-100'}
+                  : 'bg-white/10 hover:bg-white/20 text-white border border-cosmic-purple-200/50 hover:border-cosmic-purple-100'}
               `}>
                 {plan.name === 'Free' ? 'Download Free' : `Start ${plan.name}`}
               </button>
