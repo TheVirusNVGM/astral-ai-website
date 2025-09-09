@@ -38,7 +38,7 @@ export default function FeaturesSection() {
                     <img 
                       src={feature.image} 
                       alt={feature.title}
-                      className="w-auto h-40 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300"
+                      className="w-auto h-64 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300"
                     />
                   ) : (
                     <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
