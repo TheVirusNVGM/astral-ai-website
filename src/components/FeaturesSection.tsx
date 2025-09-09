@@ -33,12 +33,12 @@ export default function FeaturesSection() {
               <div className="p-6 bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 backdrop-blur-xl hover:from-white/25 hover:to-white/10 transition-all duration-500 group-hover:shadow-2xl">
                 
                 {/* Image or icon area */}
-                <div className="w-full py-8 mb-6 bg-gradient-to-r from-cosmic-purple-200/20 to-cosmic-blue-100/20 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
+                <div className="w-full py-4 mb-6 bg-gradient-to-r from-cosmic-purple-200/20 to-cosmic-blue-100/20 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
                   {feature.image ? (
                     <img 
                       src={feature.image} 
                       alt={feature.title}
-                      className="w-full h-auto max-h-32 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300"
+                      className="w-auto h-40 object-contain rounded-lg group-hover:scale-110 transition-transform duration-300"
                     />
                   ) : (
                     <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
