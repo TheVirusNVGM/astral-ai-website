@@ -41,31 +41,31 @@ export async function POST(request: NextRequest) {
       console.warn('Unknown client verifying OTP:', client_id)
     }
 
-    // Verify OTP using Supabase
+    // Verify the confirm-signup OTP (email code)
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token,
-      type: 'email'
+      type: 'signup',
     })
 
     if (error) {
       console.error('Supabase OTP verification error:', error)
-      
-      // Handle specific errors
-      if (error.message.includes('expired')) {
+
+      const msg = String(error.message || '')
+      if (msg.includes('expired')) {
         return NextResponse.json(
           { error: 'Verification code has expired' },
           { status: 400, headers: corsHeaders }
         )
       }
-      
-      if (error.message.includes('invalid')) {
+
+      if (msg.includes('invalid')) {
         return NextResponse.json(
           { error: 'Invalid verification code' },
           { status: 400, headers: corsHeaders }
         )
       }
-      
+
       return NextResponse.json(
         { error: 'Verification failed' },
         { status: 400, headers: corsHeaders }
@@ -92,11 +92,14 @@ export async function POST(request: NextRequest) {
     if (!userProfile) {
       const newUser = {
         id: data.user.id,
-        name: data.user.user_metadata?.name || data.user.user_metadata?.full_name || email.split('@')[0],
+        name:
+          data.user.user_metadata?.name ||
+          data.user.user_metadata?.full_name ||
+          email.split('@')[0],
         email: data.user.email || email,
         avatar_url: data.user.user_metadata?.avatar_url,
         subscription_tier: 'free',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       }
 
       const { data: createdUser } = await supabase
@@ -111,21 +114,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Return session data in format expected by launcher
-    return NextResponse.json({
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_in: data.session.expires_in || 3600,
-      token_type: 'bearer',
-      user: {
-        id: data.user.id,
-        name: userProfile?.name || data.user.user_metadata?.name || data.user.user_metadata?.full_name || email.split('@')[0],
-        email: data.user.email || email,
-        avatar_url: userProfile?.avatar_url || data.user.user_metadata?.avatar_url,
-        subscription_tier: userProfile?.subscription_tier || 'free',
-        created_at: userProfile?.created_at || data.user.created_at
-      }
-    }, { headers: corsHeaders })
-
+    return NextResponse.json(
+      {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_in: data.session.expires_in || 3600,
+        token_type: 'bearer',
+        user: {
+          id: data.user.id,
+          name:
+            userProfile?.name ||
+            data.user.user_metadata?.name ||
+            data.user.user_metadata?.full_name ||
+            email.split('@')[0],
+          email: data.user.email || email,
+          avatar_url: userProfile?.avatar_url || data.user.user_metadata?.avatar_url,
+          subscription_tier: userProfile?.subscription_tier || 'free',
+          created_at: userProfile?.created_at || data.user.created_at,
+        },
+      },
+      { headers: corsHeaders }
+    )
   } catch (error) {
     console.error('OTP verification API error:', error)
     return NextResponse.json(
