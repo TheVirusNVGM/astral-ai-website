@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+// CORS headers for launcher
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400',
+}
+
+// Handle preflight requests
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: corsHeaders,
+  })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, token, client_id } = await request.json()
@@ -9,14 +25,14 @@ export async function POST(request: NextRequest) {
     if (!email || !email.includes('@')) {
       return NextResponse.json(
         { error: 'Invalid email address' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
     if (!token || token.length !== 6) {
       return NextResponse.json(
         { error: 'Invalid verification code' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
@@ -39,27 +55,27 @@ export async function POST(request: NextRequest) {
       if (error.message.includes('expired')) {
         return NextResponse.json(
           { error: 'Verification code has expired' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
       
       if (error.message.includes('invalid')) {
         return NextResponse.json(
           { error: 'Invalid verification code' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
       
       return NextResponse.json(
         { error: 'Verification failed' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
     if (!data.session || !data.user) {
       return NextResponse.json(
         { error: 'Failed to create session' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       )
     }
 
@@ -108,13 +124,13 @@ export async function POST(request: NextRequest) {
         subscription_tier: userProfile?.subscription_tier || 'free',
         created_at: userProfile?.created_at || data.user.created_at
       }
-    })
+    }, { headers: corsHeaders })
 
   } catch (error) {
     console.error('OTP verification API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     )
   }
 }

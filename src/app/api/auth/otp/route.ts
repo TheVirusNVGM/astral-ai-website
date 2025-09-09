@@ -1,16 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+// CORS headers for launcher
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400',
+}
+
+// Handle preflight requests
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: corsHeaders,
+  })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, client_id } = await request.json()
 
     // Validate request
     if (!email || !email.includes('@')) {
-      return NextResponse.json(
-        { error: 'Invalid email address' },
-        { status: 400 }
-      )
+    return NextResponse.json(
+      { error: 'Invalid email address' },
+      { status: 400, headers: corsHeaders }
+    )
     }
 
     // Validate client (optional - for rate limiting)
@@ -31,15 +47,15 @@ export async function POST(request: NextRequest) {
       
       // Handle specific errors
       if (error.message.includes('rate limit')) {
-        return NextResponse.json(
-          { error: 'Too many requests. Please wait before trying again.' },
-          { status: 429 }
-        )
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before trying again.' },
+        { status: 429, headers: corsHeaders }
+      )
       }
       
       return NextResponse.json(
         { error: 'Failed to send verification code' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       )
     }
 
@@ -48,13 +64,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Verification code sent to your email'
-    })
+    }, { headers: corsHeaders })
 
   } catch (error) {
     console.error('OTP API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     )
   }
 }
