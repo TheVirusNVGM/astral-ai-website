@@ -30,10 +30,10 @@ export default function FeaturesSection() {
           {features.map((feature, index) => (
             <div key={index} className="relative overflow-hidden group">
               {/* Feature Card */}
-              <div className="h-80 p-6 bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 backdrop-blur-xl hover:from-white/25 hover:to-white/10 transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl">
+              <div className="p-6 bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 backdrop-blur-xl hover:from-white/25 hover:to-white/10 transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl">
                 
                 {/* Image placeholder area - will be added later */}
-                <div className="w-full h-32 mb-6 bg-gradient-to-r from-cosmic-purple-200/20 to-cosmic-blue-100/20 rounded-xl border border-white/10 flex items-center justify-center">
+                <div className="w-full py-8 mb-6 bg-gradient-to-r from-cosmic-purple-200/20 to-cosmic-blue-100/20 rounded-xl border border-white/10 flex items-center justify-center">
                   <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}
                   </div>
