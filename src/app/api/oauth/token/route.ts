@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getCorsHeaders } from '@/lib/cors'
+import { generateAccessToken, generateRefreshToken } from '@/lib/tokens'
 
 // Handle CORS preflight requests
 export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      ...corsHeaders,
       'Access-Control-Allow-Headers': 'Content-Type, User-Agent',
       'Access-Control-Allow-Credentials': 'true',
     },
@@ -15,20 +19,16 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = {
+    ...getCorsHeaders(origin),
+    'Access-Control-Allow-Headers': 'Content-Type, User-Agent',
+    'Access-Control-Allow-Credentials': 'true',
+  }
+  
   try {
     const body = await request.json()
-    console.log('🔥 EMERGENCY DEBUG - OAUTH TOKEN REQUEST RECEIVED!')
-    console.log('🔥 Body:', JSON.stringify(body, null, 2))
-    console.log('🔥 Method:', request.method)
-    console.log('🔥 URL:', request.url)
-    console.log('✨ OAuth token request [v3 - FRESH]:', body)
-    console.log('⏰ API timestamp [v3]:', new Date().toISOString())
-    console.log('🆕 Vercel deployment updated!')
-    console.log('🔍 Request headers:', {
-      origin: request.headers.get('origin'),
-      userAgent: request.headers.get('user-agent'),
-      contentType: request.headers.get('content-type')
-    })
+    console.log('🔥 OAuth token request received')
 
     const { grant_type, code, client_id, redirect_uri } = body
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: 'unsupported_grant_type',
         error_description: 'Only authorization_code grant type is supported'
-      }, { status: 400 })
+      }, { status: 400, headers: corsHeaders })
     }
 
     // Validate required parameters
@@ -45,11 +45,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: 'invalid_request',
         error_description: 'Missing required parameters'
-      }, { status: 400 })
+      }, { status: 400, headers: corsHeaders })
     }
 
     // Get authorization code from database
-    console.log('🔍 Searching for code in database:', { code, client_id })
     const { data: authCode, error: codeError } = await supabaseAdmin
       .from('oauth_codes')
       .select(`
@@ -68,37 +67,21 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (codeError || !authCode) {
-      console.error('❌ Invalid authorization code:', codeError)
-      console.error('🔍 Code search result:', { authCode, codeError })
+      console.error('❌ Invalid authorization code')
       return NextResponse.json({
         error: 'invalid_grant',
         error_description: 'Invalid or expired authorization code'
-      }, { status: 400 })
+      }, { status: 400, headers: corsHeaders })
     }
     
-    console.log('✅ Found authorization code:', {
-      code: authCode.code,
-      client_id: authCode.client_id,
-      user_id: authCode.user_id,
-      expires_at: authCode.expires_at,
-      created_at: authCode.created_at
-    })
+    console.log('✅ Found valid authorization code')
 
     // Check if code is expired
     const now = new Date()
     const expiresAt = new Date(authCode.expires_at)
-    const timeLeft = expiresAt.getTime() - now.getTime()
-    
-    console.log('🕰️ Time check:', {
-      now: now.toISOString(),
-      expiresAt: expiresAt.toISOString(),
-      timeLeftMs: timeLeft,
-      timeLeftMin: Math.round(timeLeft / 60000),
-      isExpired: now > expiresAt
-    })
     
     if (now > expiresAt) {
-      console.error('⏰ Code expired, deleting...')
+      console.error('⏰ Authorization code expired')
       // Delete expired code
       await supabaseAdmin
         .from('oauth_codes')
@@ -108,7 +91,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: 'invalid_grant',
         error_description: 'Authorization code has expired'
-      }, { status: 400 })
+      }, { status: 400, headers: corsHeaders })
     }
 
     // Validate redirect URI
@@ -116,7 +99,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: 'invalid_grant',
         error_description: 'Invalid redirect URI'
-      }, { status: 400 })
+      }, { status: 400, headers: corsHeaders })
     }
 
     // Generate access token
@@ -155,39 +138,14 @@ export async function POST(request: NextRequest) {
     console.log('✅ OAuth token generated successfully')
 
     return NextResponse.json(tokenResponse, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, User-Agent',
-        'Access-Control-Allow-Credentials': 'true',
-      }
+      headers: corsHeaders
     })
 
   } catch (error) {
-    console.error('❌ OAuth token error:', error)
+    console.error('❌ OAuth token error')
     return NextResponse.json({
       error: 'server_error',
       error_description: 'Internal server error'
-    }, { status: 500 })
+    }, { status: 500, headers: corsHeaders })
   }
-}
-
-function generateAccessToken(): string {
-  // Generate a secure access token (in production, use proper JWT)
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  let result = 'at_' // access token prefix
-  for (let i = 0; i < 64; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
-}
-
-function generateRefreshToken(): string {
-  // Generate a secure refresh token
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  let result = 'rt_' // refresh token prefix
-  for (let i = 0; i < 64; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
 }

@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-
-// CORS headers for launcher
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Max-Age': '86400',
-}
+import { getCorsHeaders } from '@/lib/cors'
 
 // Handle preflight requests
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   return new Response(null, {
     status: 200,
     headers: corsHeaders,
@@ -18,6 +14,9 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   try {
     const { email, client_id } = await request.json()
 
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Validate client (optional - for rate limiting)
     if (client_id !== 'astral-launcher') {
-      console.warn('Unknown client requesting OTP:', client_id)
+      console.warn('Unknown client requesting OTP')
     }
 
     // Use signInWithOtp but with channel 'email' to force OTP instead of magic link
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      console.error('Supabase OTP error:', error)
+      console.error('Supabase OTP error')
       
       // Handle specific errors
       if (error.message.includes('rate limit')) {
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('✅ OTP sent successfully to:', email)
+    console.log('✅ OTP sent successfully')
 
     return NextResponse.json(
       {
@@ -71,7 +70,7 @@ export async function POST(request: NextRequest) {
       { headers: corsHeaders }
     )
   } catch (error) {
-    console.error('OTP API error:', error)
+    console.error('OTP API error')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500, headers: corsHeaders }

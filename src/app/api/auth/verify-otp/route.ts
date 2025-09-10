@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-
-// CORS headers for launcher
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Max-Age': '86400',
-}
+import { getCorsHeaders } from '@/lib/cors'
 
 // Handle preflight requests
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   return new Response(null, {
     status: 200,
     headers: corsHeaders,
@@ -18,6 +14,9 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+  
   try {
     const { email, token, client_id } = await request.json()
 
@@ -38,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Validate client (optional)
     if (client_id !== 'astral-launcher') {
-      console.warn('Unknown client verifying OTP:', client_id)
+      console.warn('Unknown client verifying OTP')
     }
 
     // Verify OTP using Supabase
@@ -49,7 +48,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      console.error('Supabase OTP verification error:', error)
+      console.error('Supabase OTP verification error')
 
       const msg = String(error.message || '')
       if (msg.includes('expired')) {
@@ -79,7 +78,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('✅ OTP verified successfully for:', email)
+    console.log('✅ OTP verified successfully')
 
     // Fetch or create user profile
     const { data: userProfile } = await supabase
@@ -109,7 +108,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (createdUser) {
-        console.log('✅ Created new user profile:', createdUser.id)
+        console.log('✅ Created new user profile')
       }
     }
 
@@ -136,7 +135,7 @@ export async function POST(request: NextRequest) {
       { headers: corsHeaders }
     )
   } catch (error) {
-    console.error('OTP verification API error:', error)
+    console.error('OTP verification API error')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500, headers: corsHeaders }
