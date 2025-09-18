@@ -240,22 +240,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('astral-session', JSON.stringify(sessionData))
       console.log('✅ Session saved to localStorage bridge')
       
-      // Also save to launcher file via Tauri if in development
-      try {
-        // Try to call Tauri command directly if available (for dev environment)
-        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-          console.log('🤖 Detected Tauri environment, attempting direct save...')
-          // Dynamic import only in Tauri environment to avoid build errors
-          const tauriCore = await import('@tauri-apps/api/core').catch(() => null)
-          if (tauriCore) {
-            await tauriCore.invoke('save_astral_session', { sessionJson: JSON.stringify(sessionData) })
-            console.log('✅ Session also saved via Tauri command')
-            return { success: true, method: 'localStorage-and-tauri' }
-          }
-        }
-      } catch (tauriError) {
-        console.log('⚠️ Tauri save failed (normal for browser):', tauriError)
-      }
+      // Note: Website only saves to localStorage - the launcher will read from there
+      console.log('ℹ️ Website save complete - launcher will read from localStorage')
       
       return { success: true, method: 'localStorage-bridge' }
       
