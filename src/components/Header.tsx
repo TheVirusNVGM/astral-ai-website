@@ -42,14 +42,11 @@ export default function Header() {
         } catch (err) {
           console.error('❌ Header error checking username:', err)
         }
-      } else {
-        console.log('⚠️ Header: User data not ready for username check')
-      }
-    } else {
-      console.log('⚠️ Header: No user or user ID available')
       }
       
       checkUsername()
+    } else {
+      console.log('⚠️ Header: No user or user ID available')
     }
   }, [user])
 
