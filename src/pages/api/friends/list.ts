@@ -22,8 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Invalid token' });
     }
 
-    // Получаем список друзей с их данными
-    const { data: friends, error } = await supabase
+    // Получаем список друзей с их данными и статусом
+    const { data: friendsData, error } = await supabase
       .from('friends')
       .select(`
         friend_id,
@@ -33,7 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           name,
           custom_username,
           avatar_url,
-          email
+          email,
+          updated_at
         )
       `)
       .eq('user_id', user.id);
@@ -42,6 +43,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('Error fetching friends:', error);
       throw error;
     }
+
+    // Get status for all friends
+    const friendIds = friendsData?.map(f => f.friend_id) || [];
+    let friendStatuses: any[] = [];
+    
+    if (friendIds.length > 0) {
+      const { data: statusData } = await supabase
+        .from('user_status')
+        .select('user_id, status, current_game, is_playing, last_seen')
+        .in('user_id', friendIds);
+      
+      friendStatuses = statusData || [];
+    }
+
+    // Combine friends data with status
+    const friends = friendsData?.map(friendRecord => {
+      const friend = friendRecord.users;
+      const status = friendStatuses.find(s => s.user_id === friend.id);
+      
+      // Determine if user is online (active within last 5 minutes)
+      const lastSeen = status?.last_seen || friend.updated_at;
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const isRecentlyActive = lastSeen > fiveMinutesAgo;
+      
+      return {
+        id: friend.id,
+        name: friend.custom_username || friend.name,
+        custom_username: friend.custom_username,
+        avatar_url: friend.avatar_url,
+        status: status?.status || (isRecentlyActive ? 'online' : 'offline'),
+        is_playing: status?.is_playing || false,
+        current_game: status?.current_game,
+        last_seen: lastSeen,
+        friendship_created: friendRecord.created_at
+      };
+    }) || [];
 
     // Получаем входящие заявки в друзья
     const { data: incomingRequests, error: requestsError } = await supabase
