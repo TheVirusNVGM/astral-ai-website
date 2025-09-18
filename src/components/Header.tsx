@@ -13,6 +13,8 @@ export default function Header() {
 
   // Check if user needs to set username
   useEffect(() => {
+    console.log('🔍 Header useEffect triggered:', { user, userId: user?.id, hasCustomUsername: user?.hasCustomUsername })
+    
     if (user && user.id) {
       // Check if user has custom_username set
       const checkUsername = async () => {
@@ -38,8 +40,13 @@ export default function Header() {
             console.log('✅ User already has custom username:', user.customUsername)
           }
         } catch (err) {
-          console.error('Error checking username:', err)
+          console.error('❌ Header error checking username:', err)
         }
+      } else {
+        console.log('⚠️ Header: User data not ready for username check')
+      }
+    } else {
+      console.log('⚠️ Header: No user or user ID available')
       }
       
       checkUsername()
