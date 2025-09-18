@@ -44,6 +44,7 @@ export default function Header() {
         }
       }
       
+      console.log('🚀 About to call checkUsername()')
       checkUsername()
     } else {
       console.log('⚠️ Header: No user or user ID available')
