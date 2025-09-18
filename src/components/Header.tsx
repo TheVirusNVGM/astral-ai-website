@@ -1,13 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useAuth } from '@/lib/AuthContext'
 import AuthModal from './AuthModal'
+import UsernameSetupModal from './UsernameSetupModal'
 
 export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false)
   const { user, loading, signOut } = useAuth()
+
+  // Check if user needs to set username
+  useEffect(() => {
+    if (user && user.id) {
+      // Check if user has custom_username set
+      const checkUsername = async () => {
+        try {
+          const session = localStorage.getItem('astral-session')
+          if (!session) return
+          
+          const sessionData = JSON.parse(session)
+          const token = sessionData.access_token
+          
+          // We'll add this endpoint later, for now just check if name looks like email
+          if (user.name && user.name.includes('@')) {
+            setIsUsernameModalOpen(true)
+          }
+        } catch (err) {
+          console.error('Error checking username:', err)
+        }
+      }
+      
+      checkUsername()
+    }
+  }, [user])
 
   const handleGetStarted = () => {
     if (!user) {
@@ -45,6 +72,13 @@ export default function Header() {
                     <p className="text-cosmic-purple-100 text-sm capitalize">{user.subscription_tier}</p>
                   </div>
                   <button
+                    onClick={() => alert('Friends system coming soon!')}
+                    className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2"
+                  >
+                    <span>👥</span>
+                    <span>Friends</span>
+                  </button>
+                  <button
                     onClick={() => signOut()}
                     className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-all duration-300"
                   >
@@ -67,6 +101,17 @@ export default function Header() {
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
+      />
+      
+      <UsernameSetupModal
+        isOpen={isUsernameModalOpen}
+        onClose={(username) => {
+          setIsUsernameModalOpen(false)
+          if (username) {
+            // Refresh user data or show success message
+            console.log('Username set:', username)
+          }
+        }}
       />
     </>
   )
