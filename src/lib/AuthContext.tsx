@@ -61,6 +61,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             customUsername: userData.custom_username || null
           }
           
+          console.log('🔍 Raw user data from DB:', {
+            custom_username: userData.custom_username,
+            has_custom_username: userData.has_custom_username,
+            displayUser
+          })
+          
           setUser(displayUser)
           console.log('👤 User profile loaded:', displayUser)
           

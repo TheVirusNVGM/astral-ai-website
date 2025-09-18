@@ -23,9 +23,19 @@ export default function Header() {
           const sessionData = JSON.parse(session)
           const token = sessionData.access_token
           
+          console.log('🔍 Username check:', {
+            user,
+            hasCustomUsername: user.hasCustomUsername,
+            customUsername: user.customUsername,
+            shouldShowModal: !user.hasCustomUsername
+          })
+          
           // Check if user has set a custom username
           if (!user.hasCustomUsername) {
+            console.log('📝 Opening username setup modal')
             setIsUsernameModalOpen(true)
+          } else {
+            console.log('✅ User already has custom username:', user.customUsername)
           }
         } catch (err) {
           console.error('Error checking username:', err)
