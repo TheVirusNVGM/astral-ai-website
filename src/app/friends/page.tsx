@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import CreateSessionModal from '@/components/CreateSessionModal'
 
 interface Friend {
   id: string
@@ -56,6 +57,7 @@ export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [isCreateSessionModalOpen, setIsCreateSessionModalOpen] = useState(false)
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -554,7 +556,10 @@ export default function FriendsPage() {
                       <div className="text-6xl mb-4">🎮</div>
                       <h3 className="text-2xl font-bold text-white mb-2">No active game sessions</h3>
                       <p className="text-gray-400 mb-6">Create or join a game session to play with friends!</p>
-                      <button className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors">
+                      <button 
+                        onClick={() => setIsCreateSessionModalOpen(true)}
+                        className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
+                      >
                         Create Game Session
                       </button>
                     </div>
@@ -605,6 +610,16 @@ export default function FriendsPage() {
           )}
         </AnimatePresence>
       </div>
+      
+      {/* Create Session Modal */}
+      <CreateSessionModal
+        isOpen={isCreateSessionModalOpen}
+        onClose={() => setIsCreateSessionModalOpen(false)}
+        onSuccess={() => {
+          loadGameSessions() // Reload sessions after creating new one
+          setActiveTab('sessions') // Switch to sessions tab
+        }}
+      />
     </div>
   )
 }

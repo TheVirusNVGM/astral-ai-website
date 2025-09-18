@@ -78,9 +78,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         is_private,
         status,
         created_at,
-        profiles!game_sessions_host_user_id_fkey (
-          username,
-          display_name,
+        users!game_sessions_host_user_id_fkey (
+          name,
+          custom_username,
           avatar_url
         )
       `)
