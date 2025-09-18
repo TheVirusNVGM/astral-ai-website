@@ -9,7 +9,7 @@ import UsernameSetupModal from './UsernameSetupModal'
 export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false)
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, signOut, updateUser } = useAuth()
 
   // Check if user needs to set username
   useEffect(() => {
@@ -23,8 +23,8 @@ export default function Header() {
           const sessionData = JSON.parse(session)
           const token = sessionData.access_token
           
-          // We'll add this endpoint later, for now just check if name looks like email
-          if (user.name && user.name.includes('@')) {
+          // Check if user has set a custom username
+          if (!user.hasCustomUsername) {
             setIsUsernameModalOpen(true)
           }
         } catch (err) {
@@ -105,11 +105,12 @@ export default function Header() {
       
       <UsernameSetupModal
         isOpen={isUsernameModalOpen}
-        onClose={(username) => {
+        onClose={async (username) => {
           setIsUsernameModalOpen(false)
           if (username) {
-            // Refresh user data or show success message
-            console.log('Username set:', username)
+            // Refresh user data to show new username
+            await updateUser()
+            console.log('Username set and user data refreshed:', username)
           }
         }}
       />

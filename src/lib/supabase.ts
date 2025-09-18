@@ -18,6 +18,10 @@ export interface User {
   avatar_url?: string
   subscription_tier: 'free' | 'premium' | 'pro'
   created_at: string
+  // Profile fields
+  hasCustomUsername?: boolean
+  customUsername?: string | null
+  profileStatus?: string
 }
 
 export interface Project {

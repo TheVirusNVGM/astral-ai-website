@@ -17,6 +17,8 @@ interface AuthContextType {
   // OTP methods
   signInWithOTP: (email: string) => Promise<{ error: Error | null }>
   verifyOTP: (email: string, otp: string) => Promise<{ error: Error | null }>
+  // Update user after username change
+  updateUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -37,21 +39,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const fetchPromise = async () => {
-        const { data, error } = await supabase
+        // Get user data from both users and profiles tables
+        const { data: userData, error: userError } = await supabase
           .from('users')
           .select('*')
           .eq('id', userId)
           .single()
+          
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
         
-        console.log('🔍 fetchUserProfile result:', { data, error })
+        console.log('🔍 fetchUserProfile result:', { userData, userError, profileData, profileError })
         
-        if (error && error.code !== 'PGRST116') { // PGRST116 = not found, which is OK
-          throw error
+        if (userError && userError.code !== 'PGRST116') { // PGRST116 = not found, which is OK
+          throw userError
         }
 
-        if (data) {
-          setUser(data)
-          console.log('👤 User profile loaded:', data)
+        if (userData) {
+          // Merge user and profile data
+          const combinedUser = {
+            ...userData,
+            // Use custom_username if available, otherwise use name
+            name: profileData?.custom_username || userData.name,
+            hasCustomUsername: profileData?.has_custom_username || false,
+            customUsername: profileData?.custom_username || null,
+            profileStatus: profileData?.status || 'offline'
+          }
+          
+          setUser(combinedUser)
+          console.log('👤 User profile loaded:', combinedUser)
           
           // Save session for launcher after user profile is loaded
           const { data: { session } } = await supabase.auth.getSession()
@@ -393,6 +412,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return { error }
   }
+  
+  const updateUser = async () => {
+    if (supabaseUser) {
+      await fetchUserProfile(supabaseUser.id)
+    }
+  }
 
   const value = {
     user,
@@ -403,7 +428,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     signInWithProvider,
     signInWithOTP,
-    verifyOTP
+    verifyOTP,
+    updateUser
   }
 
   return (
