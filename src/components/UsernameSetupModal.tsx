@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 interface UsernameSetupModalProps {
   isOpen: boolean;
@@ -65,20 +66,23 @@ export default function UsernameSetupModal({ isOpen, onClose }: UsernameSetupMod
     setError('');
 
     try {
-      // Get current session token
-      const session = localStorage.getItem('astral-session');
-      if (!session) {
+      // Get current session token from Supabase
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error('Failed to get session');
+      }
+      
+      if (!session?.access_token) {
         throw new Error('No session found');
       }
-
-      const sessionData = JSON.parse(session);
-      const token = sessionData.access_token;
 
       const response = await fetch('/api/username/set', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({ username })
       });
