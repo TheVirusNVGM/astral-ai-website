@@ -19,12 +19,6 @@ export default function Header() {
       // Check if user has custom_username set
       const checkUsername = async () => {
         try {
-          const session = localStorage.getItem('astral-session')
-          if (!session) return
-          
-          const sessionData = JSON.parse(session)
-          const token = sessionData.access_token
-          
           console.log('🔍 Username check:', {
             user,
             hasCustomUsername: user.hasCustomUsername,
