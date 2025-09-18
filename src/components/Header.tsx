@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useAuth } from '@/lib/AuthContext'
 import AuthModal from './AuthModal'
 import UsernameSetupModal from './UsernameSetupModal'
+import FriendsDropdown from './FriendsDropdown'
 
 export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false)
+  const [isFriendsDropdownOpen, setIsFriendsDropdownOpen] = useState(false)
   const { user, loading, signOut, updateUser } = useAuth()
 
   // Check if user needs to set username
@@ -81,13 +82,19 @@ export default function Header() {
                     <p className="text-white font-semibold">{user.name}</p>
                     <p className="text-cosmic-purple-100 text-sm capitalize">{user.subscription_tier}</p>
                   </div>
-                  <Link
-                    href="/friends"
-                    className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <span>👥</span>
-                    <span>Friends</span>
-                  </Link>
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsFriendsDropdownOpen(!isFriendsDropdownOpen)}
+                      className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2"
+                    >
+                      <span>👥</span>
+                      <span>Friends</span>
+                    </button>
+                    <FriendsDropdown 
+                      isOpen={isFriendsDropdownOpen}
+                      onClose={() => setIsFriendsDropdownOpen(false)}
+                    />
+                  </div>
                   <button
                     onClick={() => signOut()}
                     className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-all duration-300"
