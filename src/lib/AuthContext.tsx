@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const { data: { session } } = await supabase.auth.getSession()
           console.log('🔑 Session for launcher:', session)
           if (session) {
-            await saveLauncherSession(session, userId, data)
+            await saveLauncherSession(session, userId, displayUser)
           }
         } else {
           console.log('⚠️ User profile not found, creating new one...')
