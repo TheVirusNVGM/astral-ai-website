@@ -112,17 +112,17 @@ export default function UsernameSetupModal({ isOpen, onClose }: UsernameSetupMod
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
+          className="bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl max-w-md w-full p-8"
         >
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
               <span className="text-2xl">👤</span>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-white mb-2">
               Choose Your Username
             </h2>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-300 text-sm">
               💡 We recommend using the same username as your Minecraft account for easier gameplay with friends
             </p>
           </div>
@@ -130,7 +130,7 @@ export default function UsernameSetupModal({ isOpen, onClose }: UsernameSetupMod
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-200 mb-2">
                 Username
               </label>
               <div className="relative">
@@ -139,12 +139,12 @@ export default function UsernameSetupModal({ isOpen, onClose }: UsernameSetupMod
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username..."
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:outline-none transition-all ${
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:outline-none transition-all bg-gray-800 text-white placeholder-gray-400 ${
                     error
-                      ? 'border-red-300 focus:ring-red-500'
+                      ? 'border-red-500 focus:ring-red-500'
                       : isAvailable === true
-                      ? 'border-green-300 focus:ring-green-500'
-                      : 'border-gray-300 focus:ring-blue-500'
+                      ? 'border-green-500 focus:ring-green-500'
+                      : 'border-gray-600 focus:ring-blue-500'
                   }`}
                   maxLength={20}
                   disabled={isSubmitting}
@@ -173,7 +173,7 @@ export default function UsernameSetupModal({ isOpen, onClose }: UsernameSetupMod
               )}
 
               {/* Format hint */}
-              <p className="text-gray-500 text-xs mt-1">
+              <p className="text-gray-400 text-xs mt-1">
                 3-20 characters, letters, numbers, and underscores only
               </p>
             </div>
@@ -183,7 +183,7 @@ export default function UsernameSetupModal({ isOpen, onClose }: UsernameSetupMod
               <button
                 type="button"
                 onClick={() => onClose()}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                className="flex-1 px-6 py-3 border border-gray-600 text-gray-300 rounded-xl hover:bg-gray-800 transition-colors"
                 disabled={isSubmitting}
               >
                 Skip for now
@@ -194,7 +194,7 @@ export default function UsernameSetupModal({ isOpen, onClose }: UsernameSetupMod
                 className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${
                   isAvailable && !isSubmitting
                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? 'Setting...' : 'Set Username'}
