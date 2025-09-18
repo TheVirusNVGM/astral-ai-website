@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Проверить доступность username
     const { data: existingUser, error: checkError } = await supabase
-      .from('profiles')
+      .from('users')
       .select('id')
       .eq('custom_username', username)
       .single();
@@ -53,15 +53,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Установить username
-    const { data: updatedProfile, error: updateError } = await supabase
-      .from('profiles')
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('users')
       .update({
         custom_username: username,
         has_custom_username: true,
         updated_at: new Date().toISOString()
       })
       .eq('id', user.id)
-      .select('custom_username, display_name, avatar_url')
+      .select('custom_username, name, avatar_url')
       .single();
 
     if (updateError) {
@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({
       success: true,
       message: 'Username set successfully',
-      profile: updatedProfile
+      user: updatedUser
     });
 
   } catch (error) {

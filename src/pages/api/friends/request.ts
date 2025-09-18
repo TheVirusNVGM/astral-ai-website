@@ -26,11 +26,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      // Найти пользователя по username
+      // Найти пользователя по custom_username
       const { data: targetUser, error: userError } = await supabase
-        .from('profiles')
-        .select('id, username')
-        .eq('username', username)
+        .from('users')
+        .select('id, custom_username')
+        .eq('custom_username', username)
         .single();
 
       if (userError || !targetUser) {
@@ -77,9 +77,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           id,
           message,
           created_at,
-          profiles!friend_requests_to_user_id_fkey (
-            username,
-            display_name
+          users!friend_requests_to_user_id_fkey (
+            custom_username,
+            name
           )
         `)
         .single();
@@ -89,7 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(200).json({ 
         success: true, 
         request: newRequest,
-        message: `Friend request sent to ${targetUser.username}`
+        message: `Friend request sent to ${targetUser.custom_username}`
       });
 
     } catch (error) {

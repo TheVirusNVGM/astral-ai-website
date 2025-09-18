@@ -39,38 +39,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const fetchPromise = async () => {
-        // Get user data from both users and profiles tables
+        // Get user data from users table only
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('*')
           .eq('id', userId)
           .single()
-          
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single()
         
-        console.log('🔍 fetchUserProfile result:', { userData, userError, profileData, profileError })
+        console.log('🔍 fetchUserProfile result:', { userData, userError })
         
         if (userError && userError.code !== 'PGRST116') { // PGRST116 = not found, which is OK
           throw userError
         }
 
         if (userData) {
-          // Merge user and profile data
-          const combinedUser = {
+          // Use custom_username if available, otherwise use name
+          const displayUser = {
             ...userData,
-            // Use custom_username if available, otherwise use name
-            name: profileData?.custom_username || userData.name,
-            hasCustomUsername: profileData?.has_custom_username || false,
-            customUsername: profileData?.custom_username || null,
-            profileStatus: profileData?.status || 'offline'
+            name: userData.custom_username || userData.name,
+            hasCustomUsername: userData.has_custom_username || false,
+            customUsername: userData.custom_username || null
           }
           
-          setUser(combinedUser)
-          console.log('👤 User profile loaded:', combinedUser)
+          setUser(displayUser)
+          console.log('👤 User profile loaded:', displayUser)
           
           // Save session for launcher after user profile is loaded
           const { data: { session } } = await supabase.auth.getSession()

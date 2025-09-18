@@ -22,20 +22,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Invalid token' });
     }
 
-    // Получаем список друзей с их профилями
+    // Получаем список друзей с их данными
     const { data: friends, error } = await supabase
       .from('friends')
       .select(`
         friend_id,
         created_at,
-        profiles!friends_friend_id_fkey (
+        users!friends_friend_id_fkey (
           id,
-          username,
-          display_name,
+          name,
+          custom_username,
           avatar_url,
-          status,
-          last_seen,
-          minecraft_uuid
+          email
         )
       `)
       .eq('user_id', user.id);
@@ -52,10 +50,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         id,
         message,
         created_at,
-        profiles!friend_requests_from_user_id_fkey (
+        users!friend_requests_from_user_id_fkey (
           id,
-          username,
-          display_name,
+          name,
+          custom_username,
           avatar_url
         )
       `)

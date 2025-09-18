@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Проверить доступность
     const { data: existingUser, error } = await supabase
-      .from('profiles')
+      .from('users')
       .select('id')
       .eq('custom_username', username)
       .single();
