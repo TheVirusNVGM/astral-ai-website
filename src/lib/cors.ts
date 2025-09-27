@@ -11,6 +11,7 @@ const ALLOWED_ORIGINS = [
   'http://localhost:1420', // Tauri dev server
   'http://localhost:5174', // Vite dev server (launcher)
   'tauri://localhost', // Tauri app protocol
+  'http://tauri.localhost', // Tauri app build protocol
 ]
 
 /**
