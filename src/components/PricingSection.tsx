@@ -1,3 +1,5 @@
+'use client'
+
 export default function PricingSection() {
   const plans = [
     {
@@ -34,23 +36,21 @@ export default function PricingSection() {
             Start free and upgrade when you need more power
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
           {plans.map((plan, index) => (
             <div
               key={index}
               role="button"
               tabIndex={0}
               aria-label={`Select ${plan.name} plan`}
-              className={`relative p-8 rounded-2xl backdrop-blur-xl cursor-pointer group transition-all duration-300 focus:outline-none 
-                border border-cosmic-purple-200/40 hover:border-cosmic-purple-100 
-                bg-gradient-to-br from-white/10 to-white/5 
-                shadow-[0_0_18px_rgba(168,85,247,0.18)] hover:shadow-[0_0_28px_rgba(168,85,247,0.35)]
-                ${plan.popular ? 'ring-1 ring-cosmic-purple-200' : ''}
+              className={`relative p-8 rounded-2xl glass card cursor-pointer group transition-all duration-300 focus:outline-none 
+                border border-white/10 hover:border-white/30 
+                flex flex-col h-full
               `}
             >
               {plan.popular && (
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="px-3 py-1 bg-cosmic-purple-200 text-white text-xs font-semibold rounded-full whitespace-nowrap">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                  <div className="badge shadow-lg">
                     Most Popular
                   </div>
                 </div>
@@ -58,11 +58,11 @@ export default function PricingSection() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-cosmic-purple-100 transition-colors">{plan.name}</h3>
                 <div className="flex items-baseline justify-center mb-2">
-                  <span className="text-4xl font-bold text-cosmic-purple-100">{plan.price}</span>
+                  <span className="text-4xl font-bold text-gradient">{plan.price}</span>
                   <span className="text-white/70 ml-2">/{plan.period}</span>
                 </div>
               </div>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-center text-white/80">
                     <span className="text-cosmic-purple-100 mr-2">✓</span>
@@ -70,11 +70,12 @@ export default function PricingSection() {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 focus:outline-none active:scale-95
-                ${plan.popular 
-                  ? 'bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white shadow-[0_0_18px_rgba(168,85,247,0.25)] hover:shadow-[0_0_28px_rgba(168,85,247,0.45)]' 
-                  : 'bg-white/10 hover:bg-white/20 text-white'}
-              `}>
+              <button
+                type="button"
+                aria-label={`CTA ${plan.name}`}
+                onClick={() => void 0}
+                className={`w-full btn ${plan.popular ? 'btn-primary btn-cta' : 'btn-outline btn-cta-secondary'} btn-lg mt-auto`}
+              >
                 {plan.name === 'Free' ? 'Download Free' : `Start ${plan.name}`}
               </button>
             </div>

@@ -109,11 +109,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative w-full max-w-md mx-4 bg-gradient-to-br from-cosmic/90 to-cosmic border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
+      <div className="relative w-full max-w-md mx-4 glass card p-8">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+          className="absolute top-4 right-4 btn btn-ghost btn-sm"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -172,7 +172,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-cosmic-purple-200 focus:ring-1 focus:ring-cosmic-purple-200 transition-colors"
+                className="input"
                 placeholder="Enter your email"
               />
             </div>
@@ -186,7 +186,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <button
               type="submit"
               disabled={loading || !email.trim()}
-              className="w-full py-3 px-4 bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+              className="btn btn-primary w-full btn-md disabled:opacity-50"
             >
               {loading ? 'Sending Code...' : 'Continue'}
             </button>
@@ -220,14 +220,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   setStep('email')
                   setError(null)
                 }}
-                className="flex-1 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors"
+                className="btn btn-ghost flex-1 btn-md"
               >
                 Back
               </button>
               <button
                 type="submit"
                 disabled={loading || otp.length < 6}
-                className="flex-1 py-3 px-4 bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+                className="btn btn-primary flex-1 btn-md disabled:opacity-50"
               >
                 {loading ? 'Verifying...' : 'Verify'}
               </button>
@@ -256,7 +256,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-cosmic-purple-200 focus:ring-1 focus:ring-cosmic-purple-200 transition-colors"
+                className="input"
                 placeholder="Enter your name"
               />
             </div>
@@ -270,7 +270,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="w-full py-3 px-4 bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+              className="btn btn-primary w-full btn-md disabled:opacity-50"
             >
               {loading ? 'Completing...' : 'Complete'}
             </button>

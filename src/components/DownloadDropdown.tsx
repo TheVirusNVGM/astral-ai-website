@@ -106,13 +106,13 @@ export default function DownloadDropdown({ isOpen, onClose }: DownloadDropdownPr
             transition={{ duration: 0.3, ease: 'easeOut' }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4"
           >
-            <div className="bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
+            <div className="glass card p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">Download ASTRAL-AI Launcher</h3>
                 <button
                   onClick={onClose}
-                  className="text-white/60 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-lg"
+                  className="btn btn-ghost btn-sm"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

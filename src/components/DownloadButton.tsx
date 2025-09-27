@@ -10,9 +10,9 @@ export default function DownloadButton() {
     <div className="relative">
       <button
         onClick={() => setIsDropdownOpen(true)}
-        className="px-8 py-4 bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white text-lg font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+        className="btn btn-primary btn-lg"
       >
-        Download Free
+Download Free
       </button>
       
       <DownloadDropdown 

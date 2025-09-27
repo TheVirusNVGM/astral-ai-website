@@ -55,11 +55,11 @@ export default function Header() {
 
   return (
     <>
-      <header className="relative z-50 border-b border-white/10 backdrop-blur-sm">
+      <header className="relative z-50 glass border-b border-white/10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden animate-glow-pulse">
+              <div className="w-10 h-10 rounded-lg overflow-hidden animate-glow-pulse ring-1 ring-white/10">
                 <Image
                   src="/logo.png"
                   alt="ASTRAL-AI Logo"
@@ -73,19 +73,19 @@ export default function Header() {
                 <p className="text-xs text-cosmic-purple-50/80">Minecraft Launcher</p>
               </div>
             </div>
-            <nav className="flex items-center space-x-8">
+            <nav className="flex items-center space-x-3">
               {loading ? (
                 <div className="w-8 h-8 border-2 border-cosmic-purple-200 border-t-transparent rounded-full animate-spin" />
               ) : user ? (
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
+                <div className="flex items-center space-x-3">
+                  <div className="text-right hidden sm:block">
                     <p className="text-white font-semibold">{user.name}</p>
                     <p className="text-cosmic-purple-100 text-sm capitalize">{user.subscription_tier}</p>
                   </div>
                   <div className="relative">
                     <button
                       onClick={() => setIsFriendsDropdownOpen(!isFriendsDropdownOpen)}
-                      className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2"
+                      className="btn btn-outline btn-sm flex items-center gap-2"
                     >
                       <span>👥</span>
                       <span>Friends</span>
@@ -97,7 +97,7 @@ export default function Header() {
                   </div>
                   <button
                     onClick={() => signOut()}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-all duration-300"
+                    className="btn btn-ghost btn-sm"
                   >
                     Sign Out
                   </button>
@@ -105,7 +105,7 @@ export default function Header() {
               ) : (
                 <button 
                   onClick={handleGetStarted}
-                  className="px-6 py-2 bg-cosmic-purple-200 hover:bg-cosmic-purple-100 text-white rounded-lg font-semibold transition-all duration-300"
+                  className="btn btn-primary btn-md"
                 >
                   Get Started
                 </button>
