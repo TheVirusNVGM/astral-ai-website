@@ -37,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="antialiased">
+    <html lang="en" className={`${inter.variable} dark`} style={{ backgroundColor: '#03010f' }}>
+      <body className="antialiased bg-cosmic text-foreground" style={{ backgroundColor: '#03010f', color: '#ededed' }}>
         <AuthProvider>
           {children}
         </AuthProvider>
