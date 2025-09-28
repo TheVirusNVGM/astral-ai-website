@@ -31,7 +31,7 @@ export default function DownloadDropdown({ isOpen, onClose }: DownloadDropdownPr
   const fetchLatestRelease = async () => {
     setLoading(true)
     try {
-      const response = await fetch('https://api.github.com/repos/TheVirusNVGM/astral-ai-launcher-releases/releases/latest')
+      const response = await fetch('https://api.github.com/repos/TheVirusNVGM/astral-ai-launcher/releases/latest')
       const data = await response.json()
       setRelease(data)
     } catch (error) {
