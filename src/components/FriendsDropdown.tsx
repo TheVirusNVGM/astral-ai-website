@@ -35,7 +35,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends')
   const [isFindFriendsModalOpen, setIsFindFriendsModalOpen] = useState(false)
-  const [friendMenuOpen, setFriendMenuOpen] = useState<string | null>(null)
+  const [friendActionsVisible, setFriendActionsVisible] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         onClose()
-        setFriendMenuOpen(null)
+        setFriendActionsVisible(null)
       }
     }
 
@@ -238,7 +238,14 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                   ) : (
                     <div className="space-y-2">
                       {friends.map((friend) => (
-                        <div key={friend.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition-colors">
+                        <div 
+                          key={friend.id} 
+                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition-colors relative"
+                          onContextMenu={(e) => {
+                            e.preventDefault()
+                            setFriendActionsVisible(friendActionsVisible === friend.id ? null : friend.id)
+                          }}
+                        >
                           <div className="relative">
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                               <span className="text-white font-semibold text-sm">
@@ -269,36 +276,26 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                               )}
                             </div>
                           </div>
-                          <div className="relative">
+                          
+                          {/* Actions - Three dots or Remove button */}
+                          {friendActionsVisible === friend.id ? (
+                            <button
+                              onClick={() => {
+                                setFriendActionsVisible(null)
+                                handleRemoveFriend(friend.id, friend.custom_username || friend.name)
+                              }}
+                              className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors font-medium"
+                            >
+                              ✕ Remove
+                            </button>
+                          ) : (
                             <button 
-                              onClick={() => setFriendMenuOpen(friendMenuOpen === friend.id ? null : friend.id)}
+                              onClick={() => setFriendActionsVisible(friend.id)}
                               className="text-gray-400 hover:text-white text-lg p-1 rounded transition-colors"
                             >
                               ⋮
                             </button>
-                            {friendMenuOpen === friend.id && (
-                              <div className="absolute right-0 top-full mt-1 w-32 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50">
-                                <button
-                                  onClick={() => {
-                                    setFriendMenuOpen(null)
-                                    // Handle invite logic here
-                                  }}
-                                  className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-gray-700 rounded-t-lg transition-colors"
-                                >
-                                  🎮 Invite
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setFriendMenuOpen(null)
-                                    handleRemoveFriend(friend.id, friend.custom_username || friend.name)
-                                  }}
-                                  className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded-b-lg transition-colors"
-                                >
-                                  ✕ Remove
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -321,7 +318,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                             <div className="flex items-center space-x-2">
                               <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
                                 <span className="text-white font-semibold text-xs">
-                                  {request.sender?.name.charAt(0).toUpperCase()}
+                                  {(request.sender?.custom_username || request.sender?.name).charAt(0).toUpperCase()}
                                 </span>
                               </div>
                               <div>
