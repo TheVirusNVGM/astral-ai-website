@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getCorsHeaders } from '@/lib/cors';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +8,21 @@ const supabase = createClient(
 );
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Add CORS headers
+  const origin = req.headers.origin;
+  const corsHeaders = getCorsHeaders(origin);
+  
+  // Set CORS headers for all responses
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value);
+  });
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
@@ -153,6 +169,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ error: 'Internal server error' });
     }
 
+  } else if (req.method === 'GET') {
+    // Получить список входящих заявок в друзья
+    const { action } = req.query;
+    
+    if (action === 'list') {
+      try {
+        const { data: requests, error } = await supabase
+          .from('friend_requests')
+          .select(`
+            id,
+            message,
+            created_at,
+            users!friend_requests_from_user_id_fkey (
+              id,
+              name,
+              custom_username,
+              avatar_url
+            )
+          `)
+          .eq('to_user_id', user.id)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        res.status(200).json({ 
+          requests: requests || []
+        });
+      } catch (error) {
+        console.error('Error fetching friend requests:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    } else {
+      res.status(400).json({ error: 'Invalid action parameter' });
+    }
   } else {
     res.status(405).json({ error: 'Method not allowed' });
   }
