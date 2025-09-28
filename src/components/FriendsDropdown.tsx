@@ -318,12 +318,12 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                             <div className="flex items-center space-x-2">
                               <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
                                 <span className="text-white font-semibold text-xs">
-                                  {(request.sender?.custom_username || request.sender?.name).charAt(0).toUpperCase()}
+                                  {(request.sender?.custom_username || request.sender?.name || 'U').charAt(0).toUpperCase()}
                                 </span>
                               </div>
                               <div>
                                 <p className="text-white font-medium text-sm">
-                                  {request.sender?.custom_username || request.sender?.name}
+                                  {request.sender?.custom_username || request.sender?.name || 'Unknown User'}
                                 </p>
                                 <p className="text-gray-400 text-xs">
                                   {new Date(request.created_at).toLocaleDateString()}
