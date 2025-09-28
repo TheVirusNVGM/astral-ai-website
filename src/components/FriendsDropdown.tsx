@@ -35,6 +35,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends')
   const [isFindFriendsModalOpen, setIsFindFriendsModalOpen] = useState(false)
+  const [friendMenuOpen, setFriendMenuOpen] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         onClose()
+        setFriendMenuOpen(null)
       }
     }
 
@@ -135,6 +137,38 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
     }
   }
 
+  const handleRemoveFriend = async (friendId: string, friendName: string) => {
+    if (!confirm(`Are you sure you want to remove ${friendName} from your friends?`)) {
+      return
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const response = await fetch('/api/friends/remove', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ 
+          friendId: friendId 
+        })
+      })
+
+      if (response.ok) {
+        await loadData() // Reload data
+      } else {
+        const error = await response.json()
+        alert(`Failed to remove friend: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Error removing friend:', error)
+      alert('Failed to remove friend. Please try again.')
+    }
+  }
+
   if (!isOpen) return null
 
   return (
@@ -208,7 +242,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                           <div className="relative">
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                               <span className="text-white font-semibold text-sm">
-                                {friend.name.charAt(0).toUpperCase()}
+                                {(friend.custom_username || friend.name).charAt(0).toUpperCase()}
                               </span>
                             </div>
                             <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-gray-900 rounded-full ${
@@ -235,9 +269,36 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                               )}
                             </div>
                           </div>
-                          <button className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 rounded transition-colors">
-                            Invite
-                          </button>
+                          <div className="relative">
+                            <button 
+                              onClick={() => setFriendMenuOpen(friendMenuOpen === friend.id ? null : friend.id)}
+                              className="text-gray-400 hover:text-white text-lg p-1 rounded transition-colors"
+                            >
+                              ⋮
+                            </button>
+                            {friendMenuOpen === friend.id && (
+                              <div className="absolute right-0 top-full mt-1 w-32 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50">
+                                <button
+                                  onClick={() => {
+                                    setFriendMenuOpen(null)
+                                    // Handle invite logic here
+                                  }}
+                                  className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-gray-700 rounded-t-lg transition-colors"
+                                >
+                                  🎮 Invite
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setFriendMenuOpen(null)
+                                    handleRemoveFriend(friend.id, friend.custom_username || friend.name)
+                                  }}
+                                  className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded-b-lg transition-colors"
+                                >
+                                  ✕ Remove
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
