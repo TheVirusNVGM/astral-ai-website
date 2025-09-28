@@ -70,7 +70,7 @@ export default function FindFriendsModal({ isOpen, onClose }: FindFriendsModalPr
     }
   }
 
-  const sendFriendRequest = async (userId: string) => {
+  const sendFriendRequest = async (username: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
@@ -82,8 +82,7 @@ export default function FindFriendsModal({ isOpen, onClose }: FindFriendsModalPr
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({ 
-          action: 'send',
-          receiver_id: userId 
+          username: username 
         })
       })
 
@@ -195,7 +194,7 @@ export default function FindFriendsModal({ isOpen, onClose }: FindFriendsModalPr
                         </span>
                       ) : (
                         <button
-                          onClick={() => sendFriendRequest(result.id)}
+                          onClick={() => sendFriendRequest(result.custom_username || result.name)}
                           className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold transition-colors"
                         >
                           Add Friend
