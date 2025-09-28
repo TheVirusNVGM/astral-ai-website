@@ -116,14 +116,14 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
       if (!session) return
 
       const response = await fetch('/api/friends/request', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({ 
           action,
-          request_id: requestId 
+          requestId: requestId 
         })
       })
 
