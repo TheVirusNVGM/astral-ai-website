@@ -17,6 +17,14 @@ export const metadata: Metadata = {
   creator: "ASTRAL-AI",
   publisher: "ASTRAL-AI",
   robots: "index, follow",
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: { url: '/favicon.png', sizes: '180x180', type: 'image/png' },
+    shortcut: '/favicon.ico',
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
