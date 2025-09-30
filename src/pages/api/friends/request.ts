@@ -97,12 +97,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Проверить, нет ли уже заявки
-      const { data: existingRequest } = await supabase
+      const { data: existingRequest, error: existingRequestError } = await supabase
         .from('friend_requests')
         .select('id, status')
-        .or(`and(from_user_id.eq.${userId},to_user_id.eq.${targetUser.id}),and(from_user_id.eq.${targetUser.id},to_user_id.eq.${userId})`)
+        .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${targetUser.id}),and(from_user_id.eq.${targetUser.id},to_user_id.eq.${user.id})`)
         .eq('status', 'pending')
-        .single();
+        .maybeSingle();
+      
+      // Also check for any request regardless of status to avoid constraint violation
+      if (!existingRequest && !existingRequestError) {
+        const { data: anyRequest } = await supabase
+          .from('friend_requests')
+          .select('id, status')
+          .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${targetUser.id}),and(from_user_id.eq.${targetUser.id},to_user_id.eq.${user.id})`)
+          .maybeSingle();
+          
+        if (anyRequest) {
+          if (anyRequest.status === 'declined') {
+            return res.status(400).json({ error: 'Friend request was previously declined' });
+          } else {
+            return res.status(400).json({ error: `Friend request already exists with status: ${anyRequest.status}` });
+          }
+        }
+      }
 
       if (existingRequest) {
         return res.status(400).json({ error: 'Friend request already exists' });
@@ -127,7 +144,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         `)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Handle duplicate key constraint violation
+        if (error.code === '23505') {
+          return res.status(400).json({ error: 'Friend request already exists' });
+        }
+        throw error;
+      }
 
       res.status(200).json({ 
         success: true, 
