@@ -189,14 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Friend request not found' });
       }
 
-      // Обновить статус заявки
-      const newStatus = action === 'accept' ? 'accepted' : 'declined';
-      const { error: updateError } = await supabase
-        .from('friend_requests')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', requestId);
-
-      if (updateError) throw updateError;
+      // Если принята - добавить в друзья
 
       // Если принята - добавить в друзья
       if (action === 'accept') {
@@ -211,6 +204,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           console.error('Error adding friends:', friendsError);
           throw friendsError;
         }
+      }
+      
+      // Удалить заявку после обработки (принятия/отклонения)
+      const { error: deleteError } = await supabase
+        .from('friend_requests')
+        .delete()
+        .eq('id', requestId);
+      
+      if (deleteError) {
+        console.error('Error deleting friend request:', deleteError);
+        throw deleteError;
       }
 
       res.status(200).json({ 
