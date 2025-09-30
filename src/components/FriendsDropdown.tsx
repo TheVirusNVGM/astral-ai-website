@@ -44,6 +44,76 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
     }
   }, [isOpen])
 
+  // Real-time subscription for friend requests
+  useEffect(() => {
+    if (!isOpen) return
+
+    const setupRealtimeSubscription = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user?.id) return
+
+      // Subscribe to friend_requests changes
+      const channel = supabase
+        .channel('friend_requests_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friend_requests',
+            filter: `to_user_id=eq.${session.user.id}`
+          },
+          (payload) => {
+            console.log('Friend request change detected:', payload)
+            // Reload friend requests when something changes
+            loadFriendRequests()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
+
+    setupRealtimeSubscription()
+  }, [isOpen])
+
+  // Real-time subscription for friends list
+  useEffect(() => {
+    if (!isOpen) return
+
+    const setupFriendsSubscription = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user?.id) return
+
+      // Subscribe to friends table changes
+      const channel = supabase
+        .channel('friends_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friends',
+            filter: `user_id=eq.${session.user.id}`
+          },
+          (payload) => {
+            console.log('Friends list change detected:', payload)
+            // Reload friends when something changes
+            loadFriends()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
+
+    setupFriendsSubscription()
+  }, [isOpen])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
