@@ -63,9 +63,7 @@ export async function POST(request: NextRequest) {
           subscription_tier,
           created_at,
           custom_username,
-          has_custom_username,
-          friends_count,
-          last_seen
+          has_custom_username
         )
       `)
       .eq('code', code)
