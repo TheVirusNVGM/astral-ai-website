@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getCorsHeaders } from '@/lib/cors';
+import { validateToken } from '@/lib/auth-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +9,21 @@ const supabase = createClient(
 );
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Add CORS headers
+  const origin = req.headers.origin;
+  const corsHeaders = getCorsHeaders(origin);
+  
+  // Set CORS headers for all responses
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value);
+  });
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,8 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
+  const userId = await validateToken(token);
+  if (!userId) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 
@@ -60,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         has_custom_username: true,
         updated_at: new Date().toISOString()
       })
-      .eq('id', user.id)
+      .eq('id', userId)
       .select('custom_username, name, avatar_url')
       .single();
 

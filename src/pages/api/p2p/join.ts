@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getCorsHeaders } from '@/lib/cors';
+import { validateToken } from '@/lib/auth-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +9,17 @@ const supabase = createClient(
 );
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Add CORS headers
+  const origin = req.headers.origin;
+  const corsHeaders = getCorsHeaders(origin);
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value);
+  });
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'PUT') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,8 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
+  const userId = await validateToken(token);
+  if (!userId) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 
@@ -59,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select('id, to_user_id, expires_at')
         .eq('id', invitationId)
         .eq('session_id', sessionId)
-        .eq('to_user_id', user.id)
+        .eq('to_user_id', userId)
         .eq('status', 'pending')
         .single();
 
@@ -86,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { data: friendship } = await supabase
           .from('friends')
           .select('id')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .eq('friend_id', session.host_user_id)
           .single();
 
@@ -122,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           joined_at: new Date().toISOString()
         })
         .eq('session_id', sessionId)
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (updateError) {
         console.error('Error updating participant status:', updateError);
@@ -134,7 +147,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .from('session_participants')
         .insert([{
           session_id: sessionId,
-          user_id: user.id,
+          user_id: userId,
           status: 'joined',
           p2p_connection_data: connectionData
         }]);

@@ -1,12 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getCorsHeaders } from '@/lib/cors';
+import { validateToken } from '@/lib/auth-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Add CORS headers
+  const origin = req.headers.origin;
+  const corsHeaders = getCorsHeaders(origin);
+  
+  // Set CORS headers for all responses
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value);
+  });
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,8 +32,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
+  const userId = await validateToken(token);
+  if (!userId) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 
@@ -37,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('users')
       .select('id, name, custom_username, avatar_url')
       .or(`custom_username.ilike.%${query}%,name.ilike.%${query}%`)
-      .neq('id', user.id) // Exclude current user
+      .neq('id', userId) // Exclude current user
       .limit(10);
 
     if (searchError) {
@@ -53,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data: friendships } = await supabase
         .from('friends')
         .select('friend_id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .in('friend_id', userIds);
 
       // Get pending friend requests (both sent and received)
@@ -62,13 +78,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select('sender_id, receiver_id')
         .eq('status', 'pending')
         .or(
-          `and(sender_id.eq.${user.id},receiver_id.in.(${userIds.join(',')})),` +
-          `and(receiver_id.eq.${user.id},sender_id.in.(${userIds.join(',')}))`
+          `and(sender_id.eq.${userId},receiver_id.in.(${userIds.join(',')})),` +
+          `and(receiver_id.eq.${userId},sender_id.in.(${userIds.join(',')}))`
         );
 
       const friendIds = new Set(friendships?.map(f => f.friend_id) || []);
       const pendingIds = new Set([
-        ...(pendingRequests?.map(r => r.sender_id === user.id ? r.receiver_id : r.sender_id) || [])
+        ...(pendingRequests?.map(r => r.sender_id === userId ? r.receiver_id : r.sender_id) || [])
       ]);
 
       // Add relationship status to each user

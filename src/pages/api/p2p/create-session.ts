@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getCorsHeaders } from '@/lib/cors';
+import { validateToken } from '@/lib/auth-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +9,21 @@ const supabase = createClient(
 );
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Add CORS headers
+  const origin = req.headers.origin;
+  const corsHeaders = getCorsHeaders(origin);
+  
+  // Set CORS headers for all responses
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value);
+  });
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,8 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
+  const userId = await validateToken(token);
+  if (!userId) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 
@@ -43,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: existingSession } = await supabase
       .from('game_sessions')
       .select('id')
-      .eq('host_user_id', user.id)
+      .eq('host_user_id', userId)
       .eq('status', 'active')
       .single();
 
@@ -57,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: session, error } = await supabase
       .from('game_sessions')
       .insert([{
-        host_user_id: user.id,
+        host_user_id: userId,
         session_name: sessionName,
         minecraft_version: minecraftVersion,
         mod_loader: modLoader,
@@ -96,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('session_participants')
       .insert([{
         session_id: session.id,
-        user_id: user.id,
+        user_id: userId,
         status: 'joined'
       }]);
 

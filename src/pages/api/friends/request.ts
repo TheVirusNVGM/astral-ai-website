@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCorsHeaders } from '@/lib/cors';
+import { validateToken } from '@/lib/auth-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,8 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
+  const userId = await validateToken(token);
+  if (!userId) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 
@@ -53,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'User not found' });
       }
 
-      if (targetUser.id === user.id) {
+      if (targetUser.id === userId) {
         return res.status(400).json({ error: 'Cannot add yourself as friend' });
       }
 
@@ -61,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data: existingFriend } = await supabase
         .from('friends')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('friend_id', targetUser.id)
         .single();
 
@@ -73,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data: existingRequest } = await supabase
         .from('friend_requests')
         .select('id, status')
-        .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${targetUser.id}),and(from_user_id.eq.${targetUser.id},to_user_id.eq.${user.id})`)
+        .or(`and(from_user_id.eq.${userId},to_user_id.eq.${targetUser.id}),and(from_user_id.eq.${targetUser.id},to_user_id.eq.${userId})`)
         .eq('status', 'pending')
         .single();
 
@@ -85,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data: newRequest, error } = await supabase
         .from('friend_requests')
         .insert([{
-          from_user_id: user.id,
+          from_user_id: userId,
           to_user_id: targetUser.id,
           message: message
         }])
@@ -127,7 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .from('friend_requests')
         .select('id, from_user_id, to_user_id, status')
         .eq('id', requestId)
-        .eq('to_user_id', user.id)
+        .eq('to_user_id', userId)
         .eq('status', 'pending')
         .single();
 
@@ -188,7 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               avatar_url
             )
           `)
-          .eq('to_user_id', user.id)
+          .eq('to_user_id', userId)
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
 
