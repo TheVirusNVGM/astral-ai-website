@@ -68,16 +68,17 @@ export async function POST(request: NextRequest) {
       `)
       .eq('code', code)
       .eq('client_id', client_id)
+      .eq('used', false)
       .single()
 
     console.log('🔍 Database search result:', { authCode, codeError })
 
     if (codeError || !authCode) {
-      console.error('❌ Invalid authorization code - not found in database')
+      console.error('❌ Invalid authorization code - not found in database or already used')
       console.error('Database error:', codeError)
       return NextResponse.json({
         error: 'invalid_grant',
-        error_description: 'Invalid or expired authorization code'
+        error_description: 'Invalid, expired, or already used authorization code'
       }, { status: 400, headers: corsHeaders })
     }
     
@@ -97,6 +98,8 @@ export async function POST(request: NextRequest) {
         .from('oauth_codes')
         .delete()
         .eq('code', code)
+        
+      console.log('🗑️ Deleted expired code:', code)
 
       return NextResponse.json({
         error: 'invalid_grant',
@@ -117,10 +120,10 @@ export async function POST(request: NextRequest) {
     const refreshToken = generateRefreshToken()
     const expiresIn = 3600 // 1 hour
 
-    // Delete the used authorization code
+    // Mark authorization code as used (instead of deleting)
     await supabaseAdmin
       .from('oauth_codes')
-      .delete()
+      .update({ used: true })
       .eq('code', code)
 
     // Save access token (optional - for token revocation)
