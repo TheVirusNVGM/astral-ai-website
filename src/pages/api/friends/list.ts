@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCorsHeaders } from '@/lib/cors';
+import { validateToken } from '@/lib/auth-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,11 +33,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'No token provided' });
   }
 
+  const userId = await validateToken(token);
+  if (!userId) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
 
     // Получаем список друзей с их данными и статусом
     const { data: friendsData, error } = await supabase
@@ -53,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           updated_at
         )
       `)
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error fetching friends:', error);
@@ -110,7 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           avatar_url
         )
       `)
-      .eq('to_user_id', user.id)
+      .eq('to_user_id', userId)
       .eq('status', 'pending');
 
     if (requestsError) {

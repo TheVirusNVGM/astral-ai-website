@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCorsHeaders } from '@/lib/cors';
+import { validateToken } from '@/lib/auth-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,8 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
+  const userId = await validateToken(token);
+  if (!userId) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 
@@ -48,30 +49,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: existingUser, error: fetchError } = await supabase
       .from('users')
       .select('id')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     if (fetchError && fetchError.code === 'PGRST116') {
-      // User doesn't exist, create them
-      const { error: createError } = await supabase
-        .from('users')
-        .insert([{
-          id: user.id,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || 'User',
-          email: user.email || '',
-          avatar_url: user.user_metadata?.avatar_url,
-          created_at: new Date().toISOString()
-        }]);
-
-      if (createError) {
-        console.error('Error creating user:', createError);
-        return res.status(500).json({ error: 'Failed to create user' });
-      }
+      // User doesn't exist - this shouldn't happen with OAuth tokens
+      console.error('User not found for OAuth token:', userId);
+      return res.status(404).json({ error: 'User not found' });
     }
 
     // Update or insert user status
     const statusData = {
-      user_id: user.id,
+      user_id: userId,
       status,
       current_game: current_game || null,
       is_playing: is_playing || false,
@@ -83,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: existingStatus } = await supabase
       .from('user_status')
       .select('user_id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (existingStatus) {
@@ -91,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { error: updateError } = await supabase
         .from('user_status')
         .update(statusData)
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (updateError) {
         console.error('Error updating user status:', updateError);
@@ -118,7 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .update({ 
         updated_at: new Date().toISOString() 
       })
-      .eq('id', user.id);
+      .eq('id', userId);
 
     res.status(200).json({
       success: true,

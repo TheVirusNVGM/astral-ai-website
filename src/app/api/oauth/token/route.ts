@@ -59,7 +59,11 @@ export async function POST(request: NextRequest) {
           email,
           avatar_url,
           subscription_tier,
-          created_at
+          created_at,
+          custom_username,
+          has_custom_username,
+          friends_count,
+          last_seen
         )
       `)
       .eq('code', code)
