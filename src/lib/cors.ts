@@ -24,7 +24,7 @@ export function getCorsHeaders(origin?: string): Record<string, string> {
   
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : 'https://www.astral-ai.online',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin', // Important for proper caching with different origins
