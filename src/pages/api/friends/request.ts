@@ -104,20 +104,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('status', 'pending')
         .maybeSingle();
       
-      // Also check for any request regardless of status to avoid constraint violation
-      if (!existingRequest && !existingRequestError) {
-        const { data: anyRequest } = await supabase
-          .from('friend_requests')
-          .select('id, status')
-          .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${targetUser.id}),and(from_user_id.eq.${targetUser.id},to_user_id.eq.${user.id})`)
-          .maybeSingle();
-          
-        if (anyRequest) {
-          if (anyRequest.status === 'declined') {
-            return res.status(400).json({ error: 'Friend request was previously declined' });
-          } else {
-            return res.status(400).json({ error: `Friend request already exists with status: ${anyRequest.status}` });
-          }
+      // Check for any existing request
+      const { data: anyRequest } = await supabase
+        .from('friend_requests')
+        .select('id, status')
+        .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${targetUser.id}),and(from_user_id.eq.${targetUser.id},to_user_id.eq.${user.id})`)
+        .maybeSingle();
+        
+      if (anyRequest) {
+        if (anyRequest.status === 'pending') {
+          return res.status(400).json({ error: 'Friend request already exists' });
+        } else if (anyRequest.status === 'accepted') {
+          return res.status(400).json({ error: 'You are already friends' });
+        } else if (anyRequest.status === 'declined') {
+          // Delete the declined request to allow a new one
+          await supabase
+            .from('friend_requests')
+            .delete()
+            .eq('id', anyRequest.id);
         }
       }
 
