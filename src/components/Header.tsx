@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useAuth } from '@/lib/AuthContext'
+import { supabase } from '@/lib/supabase'
 import AuthModal from './AuthModal'
 import UsernameSetupModal from './UsernameSetupModal'
 import FriendsDropdown from './FriendsDropdown'
@@ -11,7 +12,58 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false)
   const [isFriendsDropdownOpen, setIsFriendsDropdownOpen] = useState(false)
+  const [friendRequestCount, setFriendRequestCount] = useState(0)
   const { user, loading, signOut, updateUser } = useAuth()
+
+  // Load friend requests count
+  const loadFriendRequestsCount = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const response = await fetch('/api/friends/request?action=list', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setFriendRequestCount(data.requests?.length || 0)
+      }
+    } catch (error) {
+      console.error('Error loading friend requests count:', error)
+    }
+  }
+
+  // Real-time subscription for friend requests count
+  useEffect(() => {
+    if (!user?.id) return
+
+    // Load initial count
+    loadFriendRequestsCount()
+
+    // Subscribe to changes
+    const channel = supabase
+      .channel('header_friend_requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'friend_requests',
+          filter: `to_user_id=eq.${user.id}`
+        },
+        () => {
+          loadFriendRequestsCount()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id])
 
   // Check if user needs to set username
   useEffect(() => {
@@ -85,10 +137,15 @@ export default function Header() {
                   <div className="relative">
                     <button
                       onClick={() => setIsFriendsDropdownOpen(!isFriendsDropdownOpen)}
-                      className="btn btn-outline btn-sm flex items-center gap-2"
+                      className="btn btn-outline btn-sm flex items-center gap-2 relative"
                     >
                       <span>👥</span>
                       <span>Friends</span>
+                      {friendRequestCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                          {friendRequestCount}
+                        </span>
+                      )}
                     </button>
                     <FriendsDropdown 
                       isOpen={isFriendsDropdownOpen}

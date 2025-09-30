@@ -57,7 +57,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
 
       console.log('🔔 Setting up realtime subscription for user:', session.user.id)
 
-      // Subscribe to friend_requests changes
+      // Subscribe to friend_requests changes (incoming and outgoing)
       const channel = supabase
         .channel('friend_requests_changes')
         .on(
@@ -69,9 +69,28 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
             filter: `to_user_id=eq.${session.user.id}`
           },
           (payload) => {
-            console.log('🔔 Friend request change detected:', payload)
-            // Reload friend requests when something changes
+            console.log('🔔 Incoming friend request change:', payload)
             loadFriendRequests()
+            // Also reload friends if request was accepted
+            if (payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
+              loadFriends()
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friend_requests',
+            filter: `from_user_id=eq.${session.user.id}`
+          },
+          (payload) => {
+            console.log('🔔 Outgoing friend request change:', payload)
+            // Reload friends if request was accepted
+            if (payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
+              loadFriends()
+            }
           }
         )
         .subscribe((status) => {
@@ -100,7 +119,7 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
 
       console.log('👥 Setting up friends realtime subscription for user:', session.user.id)
 
-      // Subscribe to friends table changes
+      // Subscribe to friends table changes (both directions)
       const channel = supabase
         .channel('friends_changes')
         .on(
@@ -112,8 +131,20 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
             filter: `user_id=eq.${session.user.id}`
           },
           (payload) => {
-            console.log('👥 Friends list change detected:', payload)
-            // Reload friends when something changes
+            console.log('👥 Friends list change detected (user_id):', payload)
+            loadFriends()
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'friends',
+            filter: `friend_id=eq.${session.user.id}`
+          },
+          (payload) => {
+            console.log('👥 Friends list change detected (friend_id):', payload)
             loadFriends()
           }
         )
