@@ -43,12 +43,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
+      console.log('🔍 Searching for user with username:', username);
+      
       // Найти пользователя по custom_username
       const { data: targetUser, error: userError } = await supabase
         .from('users')
         .select('id, custom_username')
         .eq('custom_username', username)
         .single();
+      
+      console.log('👤 Target user search result:', { targetUser, userError });
 
       if (userError || !targetUser) {
         return res.status(404).json({ error: 'User not found' });
@@ -83,6 +87,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Создать заявку
+      console.log('➕ Creating friend request from userId:', userId, 'to targetUser.id:', targetUser.id);
+      
       const { data: newRequest, error } = await supabase
         .from('friend_requests')
         .insert([{
@@ -90,16 +96,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           to_user_id: targetUser.id,
           message: message
         }])
-        .select(`
-          id,
-          message,
-          created_at,
-          users!friend_requests_to_user_id_fkey (
-            custom_username,
-            name
-          )
-        `)
+        .select('id, from_user_id, to_user_id, message, created_at')
         .single();
+      
+      console.log('📝 Friend request creation result:', { newRequest, error });
 
       if (error) throw error;
 
@@ -178,17 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const { data: requests, error } = await supabase
           .from('friend_requests')
-          .select(`
-            id,
-            message,
-            created_at,
-            users!friend_requests_from_user_id_fkey (
-              id,
-              name,
-              custom_username,
-              avatar_url
-            )
-          `)
+          .select('id, from_user_id, message, created_at')
           .eq('to_user_id', userId)
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
