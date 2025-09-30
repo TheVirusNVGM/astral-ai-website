@@ -50,7 +50,12 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
 
     const setupRealtimeSubscription = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user?.id) return
+      if (!session?.user?.id) {
+        console.log('❌ No session for realtime subscription')
+        return
+      }
+
+      console.log('🔔 Setting up realtime subscription for user:', session.user.id)
 
       // Subscribe to friend_requests changes
       const channel = supabase
@@ -64,14 +69,17 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
             filter: `to_user_id=eq.${session.user.id}`
           },
           (payload) => {
-            console.log('Friend request change detected:', payload)
+            console.log('🔔 Friend request change detected:', payload)
             // Reload friend requests when something changes
             loadFriendRequests()
           }
         )
-        .subscribe()
+        .subscribe((status) => {
+          console.log('📡 Friend requests subscription status:', status)
+        })
 
       return () => {
+        console.log('🔌 Unsubscribing from friend requests')
         supabase.removeChannel(channel)
       }
     }
@@ -85,7 +93,12 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
 
     const setupFriendsSubscription = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user?.id) return
+      if (!session?.user?.id) {
+        console.log('❌ No session for friends subscription')
+        return
+      }
+
+      console.log('👥 Setting up friends realtime subscription for user:', session.user.id)
 
       // Subscribe to friends table changes
       const channel = supabase
@@ -99,14 +112,17 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
             filter: `user_id=eq.${session.user.id}`
           },
           (payload) => {
-            console.log('Friends list change detected:', payload)
+            console.log('👥 Friends list change detected:', payload)
             // Reload friends when something changes
             loadFriends()
           }
         )
-        .subscribe()
+        .subscribe((status) => {
+          console.log('📡 Friends subscription status:', status)
+        })
 
       return () => {
+        console.log('🔌 Unsubscribing from friends')
         supabase.removeChannel(channel)
       }
     }
