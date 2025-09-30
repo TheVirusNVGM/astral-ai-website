@@ -18,8 +18,12 @@ export default function Header() {
   // Load friend requests count
   const loadFriendRequestsCount = async () => {
     try {
+      console.log('🔄 [Header] Loading friend requests count...')
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      if (!session) {
+        console.log('❌ [Header] No session for loading count')
+        return
+      }
 
       const response = await fetch('/api/friends/request?action=list', {
         headers: {
@@ -29,16 +33,22 @@ export default function Header() {
 
       if (response.ok) {
         const data = await response.json()
-        setFriendRequestCount(data.requests?.length || 0)
+        const count = data.requests?.length || 0
+        console.log('✅ [Header] Friend requests count:', count)
+        setFriendRequestCount(count)
+      } else {
+        console.error('❌ [Header] Failed to load friend requests:', response.status)
       }
     } catch (error) {
-      console.error('Error loading friend requests count:', error)
+      console.error('❌ [Header] Error loading friend requests count:', error)
     }
   }
 
   // Real-time subscription for friend requests count
   useEffect(() => {
     if (!user?.id) return
+
+    console.log('🔔 [Header] Setting up friend requests count subscription for user:', user.id)
 
     // Load initial count
     loadFriendRequestsCount()
@@ -54,13 +64,17 @@ export default function Header() {
           table: 'friend_requests',
           filter: `to_user_id=eq.${user.id}`
         },
-        () => {
+        (payload) => {
+          console.log('🔔 [Header] Friend request change detected!', payload)
           loadFriendRequestsCount()
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('📡 [Header] Subscription status:', status)
+      })
 
     return () => {
+      console.log('🔌 [Header] Unsubscribing from friend requests')
       supabase.removeChannel(channel)
     }
   }, [user?.id])
