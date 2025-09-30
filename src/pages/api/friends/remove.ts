@@ -45,13 +45,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Проверить, что они действительно друзья
+    // Проверить, что они действительно друзья (ищем в обе стороны)
     const { data: friendship, error: friendshipError } = await supabase
       .from('friends')
       .select('id')
-      .eq('user_id', userId)
-      .eq('friend_id', friendId)
-      .single();
+      .or(`and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`)
+      .maybeSingle();
 
     if (friendshipError || !friendship) {
       return res.status(404).json({ error: 'Friendship not found' });

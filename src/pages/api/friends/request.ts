@@ -84,13 +84,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Cannot add yourself as friend' });
       }
 
-      // Проверить, не являются ли уже друзьями
+      // Проверить, не являются ли уже друзьями (ищем в обе стороны)
       const { data: existingFriend } = await supabase
         .from('friends')
         .select('id')
-        .eq('user_id', userId)
-        .eq('friend_id', targetUser.id)
-        .single();
+        .or(`and(user_id.eq.${userId},friend_id.eq.${targetUser.id}),and(user_id.eq.${targetUser.id},friend_id.eq.${userId})`)
+        .maybeSingle();
 
       if (existingFriend) {
         return res.status(400).json({ error: 'Already friends' });
@@ -190,14 +189,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Если принята - добавить в друзья
-
-      // Если принята - добавить в друзья
       if (action === 'accept') {
+        // Вставляем только ОДНУ запись благодаря idx_unique_friend_pair
+        // Индекс использует LEAST/GREATEST для нормализации пары
         const { error: friendsError } = await supabase
           .from('friends')
           .insert([
-            { user_id: request.from_user_id, friend_id: request.to_user_id },
-            { user_id: request.to_user_id, friend_id: request.from_user_id }
+            { user_id: request.from_user_id, friend_id: request.to_user_id }
           ]);
 
         if (friendsError) {
