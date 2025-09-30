@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json()
-    console.log('🔥 OAuth token request received')
+    console.log('🔥 OAuth token request received:', JSON.stringify(body, null, 2))
 
     const { grant_type, code, client_id, redirect_uri } = body
 
@@ -49,6 +49,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get authorization code from database
+    console.log('🔍 Searching for code:', code, 'client_id:', client_id)
+    
     const { data: authCode, error: codeError } = await supabaseAdmin
       .from('oauth_codes')
       .select(`
@@ -70,8 +72,11 @@ export async function POST(request: NextRequest) {
       .eq('client_id', client_id)
       .single()
 
+    console.log('🔍 Database search result:', { authCode, codeError })
+
     if (codeError || !authCode) {
-      console.error('❌ Invalid authorization code')
+      console.error('❌ Invalid authorization code - not found in database')
+      console.error('Database error:', codeError)
       return NextResponse.json({
         error: 'invalid_grant',
         error_description: 'Invalid or expired authorization code'
@@ -83,6 +88,9 @@ export async function POST(request: NextRequest) {
     // Check if code is expired
     const now = new Date()
     const expiresAt = new Date(authCode.expires_at)
+    
+    console.log('🕰️ Time check - now:', now.toISOString(), 'expires_at:', expiresAt.toISOString())
+    console.log('🕰️ Code is expired?', now > expiresAt)
     
     if (now > expiresAt) {
       console.error('⏰ Authorization code expired')
