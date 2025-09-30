@@ -67,6 +67,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('Error removing friend:', deleteError);
       throw deleteError;
     }
+    
+    // Также удалить связанную заявку на дружбу (если есть)
+    const { error: requestDeleteError } = await supabase
+      .from('friend_requests')
+      .delete()
+      .or(`and(from_user_id.eq.${userId},to_user_id.eq.${friendId}),and(from_user_id.eq.${friendId},to_user_id.eq.${userId})`);
+    
+    if (requestDeleteError) {
+      console.error('Error removing friend request:', requestDeleteError);
+      // Не бросаем ошибку, так как это не критично
+    }
 
     res.status(200).json({ 
       success: true, 
