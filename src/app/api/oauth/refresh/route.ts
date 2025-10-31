@@ -105,6 +105,7 @@ export async function POST(request: NextRequest) {
       refresh_token: newRefreshToken,
       token_type: 'Bearer',
       expires_in: expiresIn,
+      refresh_expires_in: refreshExpiresIn,
       scope: tokenRecord.scope
     }, { headers: corsHeaders })
 
