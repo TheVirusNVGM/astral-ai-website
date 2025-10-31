@@ -1,6 +1,7 @@
 name = "astral-ai-website"
 compatibility_date = "2025-01-20"
 pages_build_output_dir = ".vercel/output/static"
+compatibility_flags = ["nodejs_compat"]
 
 [observability]
 enabled = true
