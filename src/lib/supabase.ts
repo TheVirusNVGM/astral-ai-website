@@ -1,9 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Fallback values for build time (will be replaced at runtime)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
+// Get Supabase configuration from environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+// Validate required environment variables
+if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+  console.error('❌ NEXT_PUBLIC_SUPABASE_URL is missing or invalid:', supabaseUrl)
+  throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is required')
+}
+
+if (!supabaseAnonKey || supabaseAnonKey.includes('placeholder')) {
+  console.error('❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is missing or invalid')
+  throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable is required')
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
