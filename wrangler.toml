@@ -3,6 +3,12 @@ compatibility_date = "2025-01-20"
 pages_build_output_dir = ".vercel/output/static"
 compatibility_flags = ["nodejs_compat"]
 
+# Environment variables for build and runtime
+# Note: NEXT_PUBLIC_* variables are embedded in the build
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://kopetvvxlxihbmyqgpjd.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvcGV0dnZ4bHhpaGJteXFncGpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMjg2OTMsImV4cCI6MjA3MjgwNDY5M30.Lag2o1qE3G9wagkn94162S9o5dlVJKBS6JM7KkaIsLA"
+
 [observability]
 enabled = true
 
