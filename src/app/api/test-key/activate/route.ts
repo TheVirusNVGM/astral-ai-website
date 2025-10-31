@@ -5,31 +5,6 @@ import { validateToken } from '@/lib/auth-utils'
 
 export const runtime = 'edge'
 
-// Pre-generated test keys (20 keys)
-// Format: TEST-XXXX-XXXX-XXXX where X is alphanumeric
-const TEST_KEYS = [
-  'TEST-EMKG-SERZ-ZZGG',
-  'TEST-BT6T-NPNH-PVTW',
-  'TEST-7QDR-RXWP-DKDQ',
-  'TEST-UKJO-8CPG-6WCR',
-  'TEST-39ML-R57A-0V3E',
-  'TEST-UW9J-26LH-21HZ',
-  'TEST-DD86-4HZL-K8DO',
-  'TEST-JJXS-QSRQ-0ZVF',
-  'TEST-M2N7-VI8T-MU2B',
-  'TEST-4FCP-2JHR-NX4C',
-  'TEST-33S6-WUWY-T22R',
-  'TEST-S75C-HEXF-YIEW',
-  'TEST-A7Y4-RTCV-46GE',
-  'TEST-NN3W-GH3W-GFOW',
-  'TEST-RKDU-7RHU-8MT8',
-  'TEST-EQXR-NJ2F-XGRX',
-  'TEST-QLNN-V09V-A8GL',
-  'TEST-JE91-PDD1-B7DL',
-  'TEST-H8RI-4MDE-NYCF',
-  'TEST-KPJL-4V78-Q8T9'
-]
-
 export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get('origin')
   const corsHeaders = getCorsHeaders(origin)
@@ -57,10 +32,6 @@ export async function POST(request: NextRequest) {
 
   // Validate and normalize key (case-insensitive, trim whitespace)
   const normalizedKey = key.trim().toUpperCase()
-  
-  if (!TEST_KEYS.includes(normalizedKey)) {
-    return NextResponse.json({ error: 'Invalid test key' }, { status: 400, headers: corsHeaders })
-  }
 
   try {
     // Check current subscription tier
@@ -82,6 +53,36 @@ export async function POST(request: NextRequest) {
       }, { status: 400, headers: corsHeaders })
     }
 
+    // Check if key exists and is not used
+    const { data: testKey, error: keyError } = await supabaseAdmin
+      .from('test_keys')
+      .select('id, key, user_id, used_at')
+      .eq('key', normalizedKey)
+      .single()
+
+    if (keyError || !testKey) {
+      return NextResponse.json({ error: 'Invalid test key' }, { status: 400, headers: corsHeaders })
+    }
+
+    // Check if key is already used
+    if (testKey.user_id || testKey.used_at) {
+      return NextResponse.json({ error: 'This test key has already been used' }, { status: 400, headers: corsHeaders })
+    }
+
+    // Update test key: mark as used and assign to user
+    const { error: keyUpdateError } = await supabaseAdmin
+      .from('test_keys')
+      .update({
+        user_id: userId,
+        used_at: new Date().toISOString()
+      })
+      .eq('id', testKey.id)
+
+    if (keyUpdateError) {
+      console.error('Error updating test key:', keyUpdateError)
+      return NextResponse.json({ error: 'Failed to activate test key' }, { status: 500, headers: corsHeaders })
+    }
+
     // Update subscription tier to 'test'
     const { data: updatedUser, error: updateError } = await supabaseAdmin
       .from('users')
@@ -95,6 +96,14 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error('Error updating subscription tier:', updateError)
+      // Rollback test key update
+      await supabaseAdmin
+        .from('test_keys')
+        .update({
+          user_id: null,
+          used_at: null
+        })
+        .eq('id', testKey.id)
       return NextResponse.json({ error: 'Failed to activate test key' }, { status: 500, headers: corsHeaders })
     }
 
