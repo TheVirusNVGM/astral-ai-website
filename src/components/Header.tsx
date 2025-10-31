@@ -7,11 +7,13 @@ import { supabase } from '@/lib/supabase'
 import AuthModal from './AuthModal'
 import UsernameSetupModal from './UsernameSetupModal'
 import FriendsDropdown from './FriendsDropdown'
+import TestKeyModal from './TestKeyModal'
 
 export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false)
   const [isFriendsDropdownOpen, setIsFriendsDropdownOpen] = useState(false)
+  const [isTestKeyModalOpen, setIsTestKeyModalOpen] = useState(false)
   const [friendRequestCount, setFriendRequestCount] = useState(0)
   const { user, loading, signOut, updateUser } = useAuth()
 
@@ -167,6 +169,12 @@ export default function Header() {
                     />
                   </div>
                   <button
+                    onClick={() => setIsTestKeyModalOpen(true)}
+                    className="btn btn-ghost btn-sm"
+                  >
+                    Test
+                  </button>
+                  <button
                     onClick={() => signOut()}
                     className="btn btn-ghost btn-sm"
                   >
@@ -201,6 +209,11 @@ export default function Header() {
             console.log('Username set and user data refreshed:', username)
           }
         }}
+      />
+      
+      <TestKeyModal
+        isOpen={isTestKeyModalOpen}
+        onClose={() => setIsTestKeyModalOpen(false)}
       />
     </>
   )

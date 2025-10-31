@@ -36,7 +36,7 @@ export interface User {
   email: string
   name?: string
   avatar_url?: string
-  subscription_tier: 'free' | 'premium' | 'pro'
+  subscription_tier: 'free' | 'test' | 'premium' | 'pro'
   created_at: string
   // Profile fields
   hasCustomUsername?: boolean
