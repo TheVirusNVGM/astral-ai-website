@@ -19,16 +19,35 @@ if (!supabaseAnonKey || supabaseAnonKey.includes('placeholder')) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Service role client for API operations that need to bypass RLS
-// Fallback to anon key if service role key is not available during build
-const adminKey = (supabaseServiceRoleKey && 
-                  typeof supabaseServiceRoleKey === 'string' && 
-                  supabaseServiceRoleKey.length > 0 &&
-                  !supabaseServiceRoleKey.includes('placeholder') &&
-                  supabaseServiceRoleKey !== 'undefined') 
-  ? supabaseServiceRoleKey 
-  : supabaseAnonKey
+// Use lazy initialization to avoid errors during build when key is not available
+let _supabaseAdmin: ReturnType<typeof createClient> | null = null
 
-export const supabaseAdmin = createClient(supabaseUrl, adminKey)
+function getSupabaseAdmin() {
+  if (!_supabaseAdmin) {
+    const adminKey = (supabaseServiceRoleKey && 
+                      typeof supabaseServiceRoleKey === 'string' && 
+                      supabaseServiceRoleKey.length > 0 &&
+                      !supabaseServiceRoleKey.includes('placeholder') &&
+                      supabaseServiceRoleKey !== 'undefined') 
+      ? supabaseServiceRoleKey 
+      : supabaseAnonKey
+    
+    _supabaseAdmin = createClient(supabaseUrl, adminKey)
+  }
+  return _supabaseAdmin
+}
+
+// Export as getter to delay initialization until runtime
+export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
+  get(_target, prop) {
+    const client = getSupabaseAdmin()
+    const value = (client as any)[prop]
+    if (typeof value === 'function') {
+      return value.bind(client)
+    }
+    return value
+  }
+})
 
 // Types for our database
 export interface User {
