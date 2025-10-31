@@ -22,30 +22,38 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Use lazy initialization to avoid errors during build when key is not available
 let _supabaseAdmin: ReturnType<typeof createClient> | null = null
 
+function getSupabaseAdminKey() {
+  if (supabaseServiceRoleKey && 
+      typeof supabaseServiceRoleKey === 'string' && 
+      supabaseServiceRoleKey.length > 0 &&
+      !supabaseServiceRoleKey.includes('placeholder') &&
+      supabaseServiceRoleKey !== 'undefined') {
+    return supabaseServiceRoleKey
+  }
+  return supabaseAnonKey
+}
+
 function getSupabaseAdmin() {
   if (!_supabaseAdmin) {
-    const adminKey = (supabaseServiceRoleKey && 
-                      typeof supabaseServiceRoleKey === 'string' && 
-                      supabaseServiceRoleKey.length > 0 &&
-                      !supabaseServiceRoleKey.includes('placeholder') &&
-                      supabaseServiceRoleKey !== 'undefined') 
-      ? supabaseServiceRoleKey 
-      : supabaseAnonKey
-    
-    _supabaseAdmin = createClient(supabaseUrl, adminKey)
+    try {
+      const adminKey = getSupabaseAdminKey()
+      _supabaseAdmin = createClient(supabaseUrl, adminKey)
+    } catch (error) {
+      // Fallback to anon key if admin key fails (e.g., during build)
+      console.warn('Failed to create supabaseAdmin with service key, falling back to anon key:', error)
+      _supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey)
+    }
   }
   return _supabaseAdmin
 }
 
-// Export as getter to delay initialization until runtime
+// Export as lazy-initialized getter - only creates client when accessed
+// This avoids build-time errors when SUPABASE_SERVICE_ROLE_KEY is not available
 export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
   get(_target, prop) {
     const client = getSupabaseAdmin()
     const value = (client as any)[prop]
-    if (typeof value === 'function') {
-      return value.bind(client)
-    }
-    return value
+    return typeof value === 'function' ? value.bind(client) : value
   }
 })
 
