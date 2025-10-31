@@ -144,6 +144,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const saveLauncherSession = async (session: { access_token?: string; refresh_token?: string; expires_in?: number; user?: { user_metadata?: { name?: string; avatar_url?: string }; email?: string } } | null, userId: string, userData?: User | null) => {
+    // Don't save launcher session during OAuth authorization flow
+    // OAuth code should be used only by launcher, not by website
+    if (window.location.pathname === '/oauth/authorize') {
+      console.log('⏭️ Skipping saveLauncherSession during OAuth authorization flow')
+      return
+    }
+    
     // Check if launched from launcher
     const urlParams = new URLSearchParams(window.location.search)
     const isFromLauncher = urlParams.get('launcher') === 'true'
