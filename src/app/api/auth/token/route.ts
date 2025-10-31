@@ -110,7 +110,8 @@ export async function POST(request: NextRequest) {
     // Generate access token
     const accessToken = generateAccessToken()
     const refreshToken = generateRefreshToken()
-    const expiresIn = 3600 // 1 hour
+    const expiresIn = 3600 // 1 hour (access token)
+    const refreshExpiresIn = 7 * 24 * 60 * 60 // 7 days (refresh token)
 
     // Mark authorization code as used (instead of deleting)
     await supabase
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       .update({ used: true })
       .eq('code', code)
 
-    // Save access token (optional - for token revocation)
+    // Save tokens with expiration dates
     await supabase
       .from('oauth_tokens')
       .insert({
@@ -127,7 +128,8 @@ export async function POST(request: NextRequest) {
         client_id,
         user_id: authCode.user_id,
         scope: authCode.scope,
-        expires_at: new Date(Date.now() + expiresIn * 1000).toISOString()
+        expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
+        refresh_expires_at: new Date(Date.now() + refreshExpiresIn * 1000).toISOString()
       })
 
     // Prepare response
@@ -136,6 +138,7 @@ export async function POST(request: NextRequest) {
       refresh_token: refreshToken,
       token_type: 'Bearer',
       expires_in: expiresIn,
+      refresh_expires_in: refreshExpiresIn,
       scope: authCode.scope,
       user: authCode.users
     }
