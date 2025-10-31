@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { getCorsHeaders } from '@/lib/cors'
 
+export const runtime = 'edge'
+
 // Handle preflight requests
 export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get('origin')

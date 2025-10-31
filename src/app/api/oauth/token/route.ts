@@ -3,6 +3,8 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { getCorsHeaders } from '@/lib/cors'
 import { generateAccessToken, generateRefreshToken } from '@/lib/tokens'
 
+export const runtime = 'edge'
+
 // Handle CORS preflight requests
 export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get('origin')
