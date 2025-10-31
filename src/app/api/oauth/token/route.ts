@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('🔥 OAuth token request received:', JSON.stringify(body, null, 2))
 
-    const { grant_type, code, client_id, redirect_uri } = body
+    const { grant_type, code, client_id, redirect_uri, state } = body
 
     // Validate grant type
     if (grant_type !== 'authorization_code') {
@@ -114,6 +114,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: 'invalid_grant',
         error_description: 'Invalid redirect URI'
+      }, { status: 400, headers: corsHeaders })
+    }
+
+    // Validate state parameter (CSRF protection)
+    if (state && state !== authCode.state) {
+      return NextResponse.json({
+        error: 'invalid_request',
+        error_description: 'Invalid state parameter'
       }, { status: 400, headers: corsHeaders })
     }
 
