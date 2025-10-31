@@ -19,43 +19,16 @@ if (!supabaseAnonKey || supabaseAnonKey.includes('placeholder')) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Service role client for API operations that need to bypass RLS
-// Use lazy initialization to avoid errors during build when key is not available
-let _supabaseAdmin: ReturnType<typeof createClient> | null = null
+// Fallback to anon key if service role key is not available
+const adminKey = (supabaseServiceRoleKey && 
+                  typeof supabaseServiceRoleKey === 'string' && 
+                  supabaseServiceRoleKey.length > 0 &&
+                  !supabaseServiceRoleKey.includes('placeholder') &&
+                  supabaseServiceRoleKey !== 'undefined') 
+  ? supabaseServiceRoleKey 
+  : supabaseAnonKey
 
-function getSupabaseAdminKey() {
-  if (supabaseServiceRoleKey && 
-      typeof supabaseServiceRoleKey === 'string' && 
-      supabaseServiceRoleKey.length > 0 &&
-      !supabaseServiceRoleKey.includes('placeholder') &&
-      supabaseServiceRoleKey !== 'undefined') {
-    return supabaseServiceRoleKey
-  }
-  return supabaseAnonKey
-}
-
-function getSupabaseAdmin() {
-  if (!_supabaseAdmin) {
-    try {
-      const adminKey = getSupabaseAdminKey()
-      _supabaseAdmin = createClient(supabaseUrl, adminKey)
-    } catch (error) {
-      // Fallback to anon key if admin key fails (e.g., during build)
-      console.warn('Failed to create supabaseAdmin with service key, falling back to anon key:', error)
-      _supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey)
-    }
-  }
-  return _supabaseAdmin
-}
-
-// Export as lazy-initialized getter - only creates client when accessed
-// This avoids build-time errors when SUPABASE_SERVICE_ROLE_KEY is not available
-export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
-  get(_target, prop) {
-    const client = getSupabaseAdmin()
-    const value = (client as any)[prop]
-    return typeof value === 'function' ? value.bind(client) : value
-  }
-})
+export const supabaseAdmin = createClient(supabaseUrl, adminKey)
 
 // Types for our database
 export interface User {
