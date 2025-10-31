@@ -107,6 +107,23 @@ function OAuthAuthorizeContent() {
 
       console.log('🚀 Redirecting to launcher:', callbackUrl.toString())
       window.location.href = callbackUrl.toString()
+      
+      // Close the window after redirect (for OAuth flows opened in popup)
+      // Small delay to ensure redirect happens first
+      setTimeout(() => {
+        if (window.opener) {
+          // Window was opened via window.open(), safe to close
+          window.close()
+        } else {
+          // Window was opened directly - try to close anyway
+          // Browser may block this, but launcher should handle it
+          try {
+            window.close()
+          } catch (e) {
+            console.log('Could not close window (browser blocked)')
+          }
+        }
+      }, 500)
 
     } catch (error) {
       console.error('❌ Authorization error:', error)
@@ -125,6 +142,15 @@ function OAuthAuthorizeContent() {
     if (state) callbackUrl.searchParams.set('state', state)
 
     window.location.href = callbackUrl.toString()
+    
+    // Close window after redirect
+    setTimeout(() => {
+      try {
+        window.close()
+      } catch (e) {
+        console.log('Could not close window')
+      }
+    }, 500)
   }
 
   if (loading) {
