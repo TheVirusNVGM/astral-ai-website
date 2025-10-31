@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getCorsHeaders } from '@/lib/cors'
-import { generateAccessToken, generateRefreshToken } from '@/lib/tokens'
+import { generateRefreshToken } from '@/lib/tokens'
 
 export const runtime = 'edge'
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Find refresh token in database
     const { data: tokenRecord, error: tokenError } = await supabaseAdmin
       .from('oauth_tokens')
-      .select('id, user_id, client_id, scope, refresh_expires_at')
+      .select('id, user_id, client_id, scope, refresh_expires_at, access_token')
       .eq('refresh_token', refresh_token)
       .eq('client_id', client_id)
       .single()
@@ -73,17 +73,58 @@ export async function POST(request: NextRequest) {
       }, { status: 400, headers: corsHeaders })
     }
 
-    // Generate new tokens
-    const newAccessToken = generateAccessToken()
+    // Get user from Supabase to generate new JWT
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(tokenRecord.user_id)
+    
+    if (userError || !userData?.user) {
+      console.error('Error getting user for refresh:', userError)
+      return NextResponse.json({
+        error: 'server_error',
+        error_description: 'Failed to refresh token'
+      }, { status: 500, headers: corsHeaders })
+    }
+
+    // Try to reuse existing JWT if still valid, otherwise generate new one
+    let newSupabaseJWT: string | null = null
+    
+    // Check if current access_token is a JWT and still valid
+    if (tokenRecord.access_token && tokenRecord.access_token.startsWith('eyJ')) {
+      try {
+        const { data: { user }, error: jwtError } = await supabaseAdmin.auth.getUser(tokenRecord.access_token)
+        if (!jwtError && user) {
+          // JWT is still valid, reuse it
+          newSupabaseJWT = tokenRecord.access_token
+        }
+      } catch (error) {
+        // JWT expired or invalid, need to generate new one
+      }
+    }
+
+    // If JWT is expired or not a JWT, we need to generate a new one
+    // But Supabase Admin API doesn't provide direct method to generate JWT
+    // Best we can do is return error asking user to re-authorize
+    if (!newSupabaseJWT) {
+      // Delete old token record
+      await supabaseAdmin
+        .from('oauth_tokens')
+        .delete()
+        .eq('id', tokenRecord.id)
+
+      return NextResponse.json({
+        error: 'invalid_grant',
+        error_description: 'Access token expired. Please re-authorize the application.'
+      }, { status: 400, headers: corsHeaders })
+    }
+
+    // Generate new refresh token (rotate)
     const newRefreshToken = generateRefreshToken()
-    const expiresIn = 3600 // 1 hour (access token)
+    const expiresIn = 3600 // 1 hour (Supabase JWT lifetime)
     const refreshExpiresIn = 7 * 24 * 60 * 60 // 7 days (refresh token)
 
-    // Update token record with new tokens (rotate refresh token)
+    // Update token record with new refresh token and reuse JWT
     const { error: updateError } = await supabaseAdmin
       .from('oauth_tokens')
       .update({
-        access_token: newAccessToken,
         refresh_token: newRefreshToken,
         expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
         refresh_expires_at: new Date(Date.now() + refreshExpiresIn * 1000).toISOString(),
@@ -101,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     // Return new tokens
     return NextResponse.json({
-      access_token: newAccessToken,
+      access_token: newSupabaseJWT, // ✅ Return Supabase JWT
       refresh_token: newRefreshToken,
       token_type: 'Bearer',
       expires_in: expiresIn,

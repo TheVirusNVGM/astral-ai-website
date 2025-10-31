@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/AuthContext'
 import { supabase } from '@/lib/supabase'
+import { generateAuthCode } from '@/lib/tokens'
 
 interface OAuthApp {
   client_id: string
@@ -65,12 +66,20 @@ function OAuthAuthorizeContent() {
     setError(null)
 
     try {
+      // Get current Supabase session to extract JWT token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !session?.access_token) {
+        console.error('❌ Failed to get Supabase session')
+        throw new Error('Session not available')
+      }
+
       // Generate authorization code
       const code = generateAuthCode()
       
-      // Don't log sensitive data (authorization codes)
+      // Don't log sensitive data (authorization codes, tokens)
       
-      // Save authorization code to database
+      // Save authorization code to database with Supabase JWT token
       const { data: insertData, error: dbError } = await supabase
         .from('oauth_codes')
         .insert({
@@ -80,7 +89,8 @@ function OAuthAuthorizeContent() {
           redirect_uri: app.redirect_uri,
           scope: scope || app.scopes.join(' '),
           expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes
-          state
+          state,
+          supabase_jwt_token: session.access_token // ✅ Save Supabase JWT for later use
         })
         .select()
 
@@ -263,11 +273,3 @@ export default function OAuthAuthorize() {
   )
 }
 
-function generateAuthCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  let result = ''
-  for (let i = 0; i < 32; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
-}

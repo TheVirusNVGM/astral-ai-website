@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getCorsHeaders } from '@/lib/cors'
-import { generateAccessToken, generateRefreshToken } from '@/lib/tokens'
+import { generateRefreshToken } from '@/lib/tokens'
 
 export const runtime = 'edge'
 
@@ -117,10 +117,22 @@ export async function POST(request: NextRequest) {
       }, { status: 400, headers: corsHeaders })
     }
 
-    // Generate access token
-    const accessToken = generateAccessToken()
+    // Get Supabase JWT token from authorization code
+    // New codes will have this field populated, old codes will be NULL
+    const supabaseJWT: string | null = authCode.supabase_jwt_token || null
+    
+    // If no JWT saved (old codes created before migration), return error
+    // User needs to re-authorize to get JWT
+    if (!supabaseJWT) {
+      return NextResponse.json({
+        error: 'invalid_grant',
+        error_description: 'JWT token not available. Please re-authorize the application.'
+      }, { status: 400, headers: corsHeaders })
+    }
+
+    // Generate refresh token (custom, for OAuth token rotation)
     const refreshToken = generateRefreshToken()
-    const expiresIn = 3600 // 1 hour (access token)
+    const expiresIn = 3600 // 1 hour (Supabase JWT lifetime)
     const refreshExpiresIn = 7 * 24 * 60 * 60 // 7 days (refresh token)
 
     // Mark authorization code as used (instead of deleting)
@@ -130,10 +142,11 @@ export async function POST(request: NextRequest) {
       .eq('code', code)
 
     // Save tokens with expiration dates
+    // Note: We store the Supabase JWT as access_token, and our custom refresh token
     await supabaseAdmin
       .from('oauth_tokens')
       .insert({
-        access_token: accessToken,
+        access_token: supabaseJWT, // ✅ Use Supabase JWT instead of custom token
         refresh_token: refreshToken,
         client_id,
         user_id: authCode.user_id,
@@ -144,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare response
     const tokenResponse = {
-      access_token: accessToken,
+      access_token: supabaseJWT, // ✅ Return Supabase JWT (starts with eyJ...)
       refresh_token: refreshToken,
       token_type: 'Bearer',
       expires_in: expiresIn,
