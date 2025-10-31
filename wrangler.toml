@@ -1,8 +1,0 @@
-name = "astral-ai-website"
-compatibility_date = "2025-01-20"
-pages_build_output_dir = "out"
-
-# Custom domain configuration
-# Note: You still need to add the domain in Cloudflare Dashboard
-# This is just for reference
-# domains = ["astral-ai.online", "www.astral-ai.online"]
