@@ -68,16 +68,7 @@ function OAuthAuthorizeContent() {
       // Generate authorization code
       const code = generateAuthCode()
       
-      console.log('🔐 Generated OAuth code:', code)
-      console.log('💾 Saving to database:', {
-        code,
-        client_id: app.client_id,
-        user_id: user.id,
-        redirect_uri: app.redirect_uri,
-        scope: scope || app.scopes.join(' '),
-        expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-        state
-      })
+      // Don't log sensitive data (authorization codes)
       
       // Save authorization code to database
       const { data: insertData, error: dbError } = await supabase
@@ -93,8 +84,6 @@ function OAuthAuthorizeContent() {
         })
         .select()
 
-      console.log('✅ Insert result:', { insertData, dbError })
-
       if (dbError) {
         console.error('❌ Database insert error:', dbError)
         throw dbError
@@ -105,7 +94,7 @@ function OAuthAuthorizeContent() {
       callbackUrl.searchParams.set('code', code)
       if (state) callbackUrl.searchParams.set('state', state)
 
-      console.log('🚀 Redirecting to launcher:', callbackUrl.toString())
+      // Redirect to launcher (don't log sensitive URL with code)
       window.location.href = callbackUrl.toString()
       
       // Close the window after redirect (for OAuth flows opened in popup)

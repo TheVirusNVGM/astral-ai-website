@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json()
-    console.log('🔥 OAuth token request received:', JSON.stringify(body, null, 2))
+    // Don't log sensitive data (codes, tokens)
+    console.log('🔥 OAuth token request received')
 
     const { grant_type, code, client_id, redirect_uri, state } = body
 
@@ -51,8 +52,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Get authorization code from database
-    console.log('🔍 Searching for code:', code, 'client_id:', client_id)
-    
     const { data: authCode, error: codeError } = await supabaseAdmin
       .from('oauth_codes')
       .select(`
@@ -73,8 +72,6 @@ export async function POST(request: NextRequest) {
       .eq('used', false)
       .single()
 
-    console.log('🔍 Database search result:', { authCode, codeError })
-
     if (codeError || !authCode) {
       console.error('❌ Invalid authorization code - not found in database or already used')
       console.error('Database error:', codeError)
@@ -84,14 +81,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400, headers: corsHeaders })
     }
     
-    console.log('✅ Found valid authorization code')
+    // Authorization code validated successfully
 
     // Check if code is expired
     const now = new Date()
     const expiresAt = new Date(authCode.expires_at)
-    
-    console.log('🕰️ Time check - now:', now.toISOString(), 'expires_at:', expiresAt.toISOString())
-    console.log('🕰️ Code is expired?', now > expiresAt)
     
     if (now > expiresAt) {
       console.error('⏰ Authorization code expired')
@@ -100,8 +94,6 @@ export async function POST(request: NextRequest) {
         .from('oauth_codes')
         .delete()
         .eq('code', code)
-        
-      console.log('🗑️ Deleted expired code:', code)
 
       return NextResponse.json({
         error: 'invalid_grant',
@@ -158,7 +150,7 @@ export async function POST(request: NextRequest) {
       user: authCode.users
     }
 
-    console.log('✅ OAuth token generated successfully')
+    // OAuth token generated successfully
 
     return NextResponse.json(tokenResponse, {
       headers: corsHeaders
