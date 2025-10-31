@@ -19,8 +19,16 @@ if (!supabaseAnonKey || supabaseAnonKey.includes('placeholder')) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Service role client for API operations that need to bypass RLS
-// Fallback to anon key if service role key is not available
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey || supabaseAnonKey)
+// Fallback to anon key if service role key is not available during build
+const adminKey = (supabaseServiceRoleKey && 
+                  typeof supabaseServiceRoleKey === 'string' && 
+                  supabaseServiceRoleKey.length > 0 &&
+                  !supabaseServiceRoleKey.includes('placeholder') &&
+                  supabaseServiceRoleKey !== 'undefined') 
+  ? supabaseServiceRoleKey 
+  : supabaseAnonKey
+
+export const supabaseAdmin = createClient(supabaseUrl, adminKey)
 
 // Types for our database
 export interface User {
