@@ -13,14 +13,14 @@ export default function PricingSection() {
       name: "Premium", 
       price: "$9.99",
       period: "month",
-      features: ["Everything in Free", "AI Smart Sorting", "Dr. Crash Analysis", "Priority Support"],
+      features: ["Everything in Free", "AI Smart Sorting", "AI Builder Access", "Priority Support"],
       popular: true
     },
     {
       name: "Pro",
       price: "$19.99",
       period: "month", 
-      features: ["Everything in Premium", "Unlimited AI Features", "API Access", "1-on-1 Support"],
+      features: ["Everything in Premium", "Unlimited AI Features", "AI Builder Access", "1-on-1 Support"],
       popular: false
     }
   ]
