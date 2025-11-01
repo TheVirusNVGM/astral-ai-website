@@ -31,18 +31,27 @@ export default function DownloadDropdown({ isOpen, onClose }: DownloadDropdownPr
   const fetchLatestRelease = async () => {
     setLoading(true)
     try {
-      const response = await fetch('https://api.github.com/repos/TheVirusNVGM/astral-ai-launcher/releases/latest')
+      const response = await fetch('https://api.github.com/repos/TheVirusNVGM/astral-ai-launcher-releases/releases/latest', {
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        }
+      })
       const data = await response.json()
-      setRelease(data)
+      if (!response.ok || !Array.isArray((data as any)?.assets)) {
+        throw new Error('Invalid GitHub releases response')
+      }
+      setRelease({ tag_name: (data as any).tag_name, assets: (data as any).assets })
     } catch (error) {
       console.error('Failed to fetch latest release:', error)
+      setRelease(null)
     } finally {
       setLoading(false)
     }
   }
 
   const handleWindowsDownload = () => {
-    if (!release) return
+    if (!release || !Array.isArray(release.assets)) return
     
     const windowsAsset = release.assets.find(asset => 
       asset.name.toLowerCase().includes('.msi') || 
