@@ -36,7 +36,28 @@ export default function PricingSection() {
             Start free and upgrade when you need more power
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
+        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch" style={{ minHeight: '500px', perspective: '1200px' }}>
+          {/* Hazard tape overlays - wrapping around cards with 3D effect */}
+          {/* Left side tapes */}
+          <div className="hazard-tape" style={{ top: '8%', left: '-10%', width: '130%', transform: 'rotate(-28deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '22%', left: '-10%', width: '130%', transform: 'rotate(18deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '38%', left: '-10%', width: '130%', transform: 'rotate(-32deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '52%', left: '-10%', width: '130%', transform: 'rotate(22deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '68%', left: '-10%', width: '130%', transform: 'rotate(-26deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '82%', left: '-10%', width: '130%', transform: 'rotate(16deg) translateZ(0)' }} />
+          
+          {/* Right side tapes */}
+          <div className="hazard-tape" style={{ top: '12%', right: '-10%', width: '130%', transform: 'rotate(28deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '28%', right: '-10%', width: '130%', transform: 'rotate(-22deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '42%', right: '-10%', width: '130%', transform: 'rotate(24deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '58%', right: '-10%', width: '130%', transform: 'rotate(-18deg) translateZ(0)' }} />
+          <div className="hazard-tape" style={{ top: '72%', right: '-10%', width: '130%', transform: 'rotate(26deg) translateZ(0)' }} />
+          
+          {/* Test Only sign - centered over the pricing cards */}
+          <div className="test-only-sign" style={{ top: '45%' }}>
+            TEST ONLY
+          </div>
+
           {plans.map((plan, index) => (
             <div
               key={index}
@@ -47,6 +68,7 @@ export default function PricingSection() {
                 border border-white/10 hover:border-white/30 
                 flex flex-col h-full
               `}
+              style={{ zIndex: 10 }}
             >
               {plan.popular && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
