@@ -202,13 +202,7 @@ html, body {
   box-shadow: 
     /* Main shadow */
     0 6px 12px rgba(0, 0, 0, 0.5),
-    0 3px 6px rgba(0, 0, 0, 0.4),
-    /* Raised edge effect */
-    inset 0 3px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.3),
-    /* Side lighting */
-    inset -2px 0 4px rgba(0, 0, 0, 0.2),
-    inset 2px 0 4px rgba(255, 255, 255, 0.15);
+    0 3px 6px rgba(0, 0, 0, 0.4);
   
   /* 3D transform for depth */
   transform-style: preserve-3d;
@@ -231,43 +225,22 @@ html, body {
   );
 }
 
-.hazard-tape::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /* Light source from top-left */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.25) 0%,
-    rgba(255, 255, 255, 0.15) 20%,
-    transparent 40%,
-    transparent 60%,
-    rgba(0, 0, 0, 0.15) 80%,
-    rgba(0, 0, 0, 0.25) 100%
-  );
-  pointer-events: none;
-  border-radius: 2px;
-}
-
 .hazard-tape::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  /* Highlight on top edge for 3D effect */
+  height: 8px;
+  /* Soft highlight on top edge only */
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.2) 15%,
-    transparent 30%
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.3) 30%,
+    transparent 70%
   );
   pointer-events: none;
-  border-radius: 2px;
+  border-radius: 2px 2px 0 0;
 }
 
 /* Tapes behind cards */
@@ -278,6 +251,32 @@ html, body {
 /* Tapes in front of cards */
 .hazard-tape-front {
   z-index: 15;
+}
+
+/* Soft edge lighting for pricing cards container */
+.pricing-container {
+  position: relative;
+}
+
+.pricing-container::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  pointer-events: none;
+  z-index: 1;
+  background: 
+    /* Top edge */
+    linear-gradient(180deg, rgba(139, 92, 246, 0.15) 0%, transparent 15%),
+    /* Bottom edge */
+    linear-gradient(0deg, rgba(139, 92, 246, 0.15) 0%, transparent 15%),
+    /* Left edge */
+    linear-gradient(90deg, rgba(139, 92, 246, 0.12) 0%, transparent 12%),
+    /* Right edge */
+    linear-gradient(270deg, rgba(139, 92, 246, 0.12) 0%, transparent 12%);
+  background-size: 100% 20%, 100% 20%, 20% 100%, 20% 100%;
+  background-position: top, bottom, left, right;
+  background-repeat: no-repeat;
+  border-radius: 24px;
 }
 
 /* Test Only sign - 3D effect with lighting */

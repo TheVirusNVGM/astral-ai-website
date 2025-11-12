@@ -36,7 +36,7 @@ export default function PricingSection() {
             Start free and upgrade when you need more power
           </p>
         </div>
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch" style={{ minHeight: '500px', perspective: '1200px', overflow: 'hidden' }}>
+        <div className="relative pricing-container grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch" style={{ minHeight: '500px', perspective: '1200px', overflow: 'hidden' }}>
           {/* Hazard tape overlays - wrapping around cards seamlessly */}
           {/* Tapes behind cards (z-index: 5) */}
           <div className="hazard-tape hazard-tape-behind" style={{ top: '5%', left: '-25%', transform: 'rotate(-30deg) translateZ(0)' }} />
