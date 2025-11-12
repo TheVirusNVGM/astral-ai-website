@@ -36,22 +36,33 @@ export default function PricingSection() {
             Start free and upgrade when you need more power
           </p>
         </div>
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch" style={{ minHeight: '500px', perspective: '1200px' }}>
-          {/* Hazard tape overlays - wrapping around cards with 3D effect */}
-          {/* Left side tapes */}
-          <div className="hazard-tape" style={{ top: '8%', left: '-10%', width: '130%', transform: 'rotate(-28deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '22%', left: '-10%', width: '130%', transform: 'rotate(18deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '38%', left: '-10%', width: '130%', transform: 'rotate(-32deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '52%', left: '-10%', width: '130%', transform: 'rotate(22deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '68%', left: '-10%', width: '130%', transform: 'rotate(-26deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '82%', left: '-10%', width: '130%', transform: 'rotate(16deg) translateZ(0)' }} />
+        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch" style={{ minHeight: '500px', perspective: '1200px', overflow: 'hidden' }}>
+          {/* Hazard tape overlays - wrapping around cards seamlessly */}
+          {/* Tapes behind cards (z-index: 5) */}
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '5%', left: '-25%', transform: 'rotate(-30deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '18%', left: '-25%', transform: 'rotate(20deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '32%', left: '-25%', transform: 'rotate(-28deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '48%', left: '-25%', transform: 'rotate(22deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '62%', left: '-25%', transform: 'rotate(-26deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '78%', left: '-25%', transform: 'rotate(18deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '10%', right: '-25%', transform: 'rotate(30deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '25%', right: '-25%', transform: 'rotate(-24deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '40%', right: '-25%', transform: 'rotate(26deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '55%', right: '-25%', transform: 'rotate(-20deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '70%', right: '-25%', transform: 'rotate(24deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-behind" style={{ top: '85%', right: '-25%', transform: 'rotate(-22deg) translateZ(0)' }} />
           
-          {/* Right side tapes */}
-          <div className="hazard-tape" style={{ top: '12%', right: '-10%', width: '130%', transform: 'rotate(28deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '28%', right: '-10%', width: '130%', transform: 'rotate(-22deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '42%', right: '-10%', width: '130%', transform: 'rotate(24deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '58%', right: '-10%', width: '130%', transform: 'rotate(-18deg) translateZ(0)' }} />
-          <div className="hazard-tape" style={{ top: '72%', right: '-10%', width: '130%', transform: 'rotate(26deg) translateZ(0)' }} />
+          {/* Tapes in front of cards (z-index: 15) */}
+          <div className="hazard-tape hazard-tape-front" style={{ top: '12%', left: '-25%', transform: 'rotate(-25deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '28%', left: '-25%', transform: 'rotate(24deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '45%', left: '-25%', transform: 'rotate(-30deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '60%', left: '-25%', transform: 'rotate(19deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '75%', left: '-25%', transform: 'rotate(-27deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '15%', right: '-25%', transform: 'rotate(27deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '32%', right: '-25%', transform: 'rotate(-23deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '50%', right: '-25%', transform: 'rotate(25deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '65%', right: '-25%', transform: 'rotate(-21deg) translateZ(0)' }} />
+          <div className="hazard-tape hazard-tape-front" style={{ top: '80%', right: '-25%', transform: 'rotate(23deg) translateZ(0)' }} />
           
           {/* Test Only sign - centered over the pricing cards */}
           <div className="test-only-sign" style={{ top: '45%' }}>

@@ -183,10 +183,10 @@ html, body {
   100% { transform: translateX(220%) rotate(25deg); }
 }
 
-/* Hazard tape (warning tape) - 3D effect with lighting */
+/* Hazard tape (warning tape) - 3D effect with lighting, seamless wrapping */
 .hazard-tape {
   position: absolute;
-  width: 100%;
+  width: 150%;
   height: 50px;
   background: repeating-linear-gradient(
     45deg,
@@ -196,7 +196,6 @@ html, body {
     #000 44px
   );
   pointer-events: none;
-  z-index: 20;
   opacity: 0.95;
   
   /* 3D shadow effect */
@@ -214,6 +213,22 @@ html, body {
   /* 3D transform for depth */
   transform-style: preserve-3d;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  
+  /* Fade edges for seamless wrapping */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
 }
 
 .hazard-tape::before {
@@ -253,6 +268,16 @@ html, body {
   );
   pointer-events: none;
   border-radius: 2px;
+}
+
+/* Tapes behind cards */
+.hazard-tape-behind {
+  z-index: 5;
+}
+
+/* Tapes in front of cards */
+.hazard-tape-front {
+  z-index: 15;
 }
 
 /* Test Only sign - 3D effect with lighting */
