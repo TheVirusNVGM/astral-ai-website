@@ -1,13 +1,28 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Space_Grotesk, Syne, Archivo_Black } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from '@/lib/AuthContext'
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-body',
   display: 'swap',
-});
+})
+
+const syne = Syne({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const archivoBlack = Archivo_Black({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-heavy',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: "ASTRAL-AI Launcher - The Future of Minecraft Modding",
@@ -46,13 +61,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} dark`} style={{ backgroundColor: '#03010f' }}>
+    <html 
+      lang="en" 
+      className={`${spaceGrotesk.variable} ${syne.variable} ${archivoBlack.variable}`}
+    >
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
       </head>
-      <body className="antialiased bg-cosmic text-foreground" style={{ backgroundColor: '#03010f', color: '#ededed' }}>
+      <body className="antialiased">
         <AuthProvider>
           {children}
         </AuthProvider>

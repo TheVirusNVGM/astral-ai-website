@@ -11,6 +11,15 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        neo: {
+          sand: "#FFFAE5",
+          black: "#0f0f0f",
+          orange: "#FF4D00",
+          accent: "#A3FF00",
+          purple: "#9D00FF",
+          blue: "#0047FF",
+          white: "#ffffff"
+        },
         // Cosmic theme colors from launcher
         cosmic: '#03010f',
         'cosmic-glow': {
@@ -33,7 +42,17 @@ const config: Config = {
         }
       },
       fontFamily: {
-        inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
+        inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        body: ['var(--font-body)', '"Space Grotesk"', 'sans-serif'],
+        display: ['var(--font-display)', '"Syne"', 'sans-serif'],
+        heavy: ['var(--font-heavy)', '"Archivo Black"', 'sans-serif']
+      },
+      boxShadow: {
+        neo: '8px 8px 0 0 #0f0f0f',
+        'neo-sm': '4px 4px 0 0 #0f0f0f',
+        'neo-lg': '12px 12px 0 0 #0f0f0f',
+        'neo-hover': '12px 12px 0 0 #0f0f0f',
+        'neo-active': '2px 2px 0 0 #0f0f0f',
       },
       animation: {
         'twinkle': 'twinkle 4s ease-in-out infinite',

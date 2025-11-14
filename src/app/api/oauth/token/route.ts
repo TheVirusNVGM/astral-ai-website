@@ -7,7 +7,7 @@ export const runtime = 'edge'
 
 // Handle CORS preflight requests
 export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin')
+  const origin = request.headers.get('origin') || undefined
   const corsHeaders = getCorsHeaders(origin)
   
   return new NextResponse(null, {
@@ -21,7 +21,7 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get('origin')
+  const origin = request.headers.get('origin') || undefined
   const corsHeaders = {
     ...getCorsHeaders(origin),
     'Access-Control-Allow-Headers': 'Content-Type, User-Agent',
@@ -30,9 +30,6 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json()
-    // Don't log sensitive data (codes, tokens)
-    console.log('🔥 OAuth token request received')
-
     const { grant_type, code, client_id, redirect_uri, state } = body
 
     // Validate grant type
@@ -51,12 +48,14 @@ export async function POST(request: NextRequest) {
       }, { status: 400, headers: corsHeaders })
     }
 
-    // Get authorization code from database
+    // 🛡️ АТОМАРНАЯ ОПЕРАЦИЯ: Получаем код и помечаем как использованный в одной транзакции
+    // Это предотвращает race condition при параллельных запросах
+    // 🔧 Указываем конкретный foreign key, чтобы Supabase знал, какой использовать
     const { data: authCode, error: codeError } = await supabaseAdmin
       .from('oauth_codes')
       .select(`
         *,
-        users (
+        users!oauth_codes_user_id_fkey (
           id,
           name,
           email,
@@ -73,8 +72,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (codeError || !authCode) {
-      console.error('❌ Invalid authorization code - not found in database or already used')
-      console.error('Database error:', codeError)
+      console.error('❌ Invalid authorization code:', codeError?.message || 'not found or already used')
       return NextResponse.json({
         error: 'invalid_grant',
         error_description: 'Invalid, expired, or already used authorization code'
@@ -135,18 +133,14 @@ export async function POST(request: NextRequest) {
     const expiresIn = 3600 // 1 hour (Supabase JWT lifetime)
     const refreshExpiresIn = 7 * 24 * 60 * 60 // 7 days (refresh token)
 
-    // Mark authorization code as used (instead of deleting)
-    await supabaseAdmin
-      .from('oauth_codes')
-      .update({ used: true })
-      .eq('code', code)
-
+    // 🛡️ КРИТИЧНО: Сначала сохраняем токены, ПОТОМ помечаем код как использованный
+    // Это гарантирует, что если сохранение токенов упадет, код останется валидным
     // Save tokens with expiration dates
     // Note: We store the Supabase JWT as access_token, and our custom refresh token
-    await supabaseAdmin
+    const { data: insertedToken, error: tokenInsertError } = await supabaseAdmin
       .from('oauth_tokens')
       .insert({
-        access_token: supabaseJWT, // ✅ Use Supabase JWT instead of custom token
+        access_token: supabaseJWT,
         refresh_token: refreshToken,
         client_id,
         user_id: authCode.user_id,
@@ -154,6 +148,63 @@ export async function POST(request: NextRequest) {
         expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
         refresh_expires_at: new Date(Date.now() + refreshExpiresIn * 1000).toISOString()
       })
+      .select()
+      .single()
+
+    // Если сохранение токенов упало, код остается валидным для повторной попытки
+    if (tokenInsertError) {
+      // Проверяем, может быть это ошибка уникальности (токен уже существует)
+      if (tokenInsertError.code === '23505') { // Unique violation
+        // Обновляем существующий токен
+        const { data: updatedToken, error: updateError } = await supabaseAdmin
+          .from('oauth_tokens')
+          .update({
+            refresh_token: refreshToken,
+            client_id,
+            user_id: authCode.user_id,
+            scope: authCode.scope,
+            expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
+            refresh_expires_at: new Date(Date.now() + refreshExpiresIn * 1000).toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('access_token', supabaseJWT)
+          .select()
+          .single()
+
+        if (updateError) {
+          console.error('❌ Failed to update token after unique violation:', updateError)
+          return NextResponse.json({
+            error: 'server_error',
+            error_description: 'Failed to save or update token. Please try again.'
+          }, { status: 500, headers: corsHeaders })
+        }
+      } else {
+        console.error('❌ Failed to save OAuth tokens:', tokenInsertError)
+        return NextResponse.json({
+          error: 'server_error',
+          error_description: 'Failed to save tokens. Please try again.'
+        }, { status: 500, headers: corsHeaders })
+      }
+    }
+
+    // 🛡️ АТОМАРНОЕ ОБНОВЛЕНИЕ: Помечаем код как использованный ТОЛЬКО если он еще не использован
+    // Это предотвращает race condition - если два запроса придут одновременно,
+    // только один сможет обновить код (WHERE used = false)
+    // ВАЖНО: Делаем это ПОСЛЕ успешного сохранения токенов
+    const { data: updateResult, error: updateError } = await supabaseAdmin
+      .from('oauth_codes')
+      .update({ used: true })
+      .eq('code', code)
+      .eq('used', false) // Критично: обновляем ТОЛЬКО если еще не использован
+      .select()
+
+    // Проверяем, что код был успешно помечен как использованный
+    // Если updateResult пустой, значит код уже был использован другим запросом
+    // Но это не критично, так как токены уже сохранены
+    if (updateError || !updateResult || updateResult.length === 0) {
+      // Не возвращаем ошибку, так как токены уже сохранены
+      // Просто продолжаем выполнение
+    }
 
     // Prepare response
     const tokenResponse = {

@@ -1,113 +1,121 @@
 'use client'
 
-export default function PricingSection() {
-  const plans = [
-    {
-      name: "Free",
-      price: "$0",
-      period: "forever",
-      features: ["Visual Mod Board", "Multi-Loader Support", "Basic Mod Search"],
-      popular: false
-    },
-    {
-      name: "Premium", 
-      price: "$9.99",
-      period: "month",
-      features: ["Everything in Free", "AI Smart Sorting", "AI Builder Access", "Priority Support"],
-      popular: true
-    },
-    {
-      name: "Pro",
-      price: "$19.99",
-      period: "month", 
-      features: ["Everything in Premium", "Unlimited AI Features", "AI Builder Access", "1-on-1 Support"],
-      popular: false
-    }
-  ]
+const plans = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "forever",
+    note: "For explorers who want to feel the chaos without paying a credit card tax.",
+    features: [
+      "Visual Mod Atlas",
+      "Multi-loader ready",
+      "Basic mod search",
+      "Manual builder prompts"
+    ],
+    highlight: false
+  },
+  {
+    name: "Premium", 
+    price: "$9.99",
+    period: "month",
+    note: "Unlock the AI Builder, smart sorting, and support that actually replies.",
+    features: [
+      "Everything in Free",
+      "AI Builder Access",
+      "Smart auto-sorting",
+      "Priority human support"
+    ],
+    highlight: true
+  },
+  {
+    name: "Pro",
+    price: "$19.99",
+    period: "month", 
+    note: "Bring the whole studio. Unlimited AI features and white-glove assistance.",
+    features: [
+      "Everything in Premium",
+      "Unlimited AI prompts",
+      "Private launcher themes",
+      "1-on-1 concierge"
+    ],
+    highlight: false
+  }
+]
 
+const hazardTapes = [
+  { className: 'hazard-tape hazard-tape-front', style: { top: '8%', left: '-25%', transform: 'rotate(-28deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '25%', left: '-20%', transform: 'rotate(20deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '45%', left: '-18%', transform: 'rotate(-24deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '12%', right: '-25%', transform: 'rotate(30deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '32%', right: '-22%', transform: 'rotate(-26deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '18%', left: '-22%', transform: 'rotate(-22deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '38%', left: '-18%', transform: 'rotate(24deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '58%', left: '-20%', transform: 'rotate(-20deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '20%', right: '-24%', transform: 'rotate(26deg)', zIndex: 60 } },
+  { className: 'hazard-tape hazard-tape-front', style: { top: '48%', right: '-20%', transform: 'rotate(-24deg)', zIndex: 60 } },
+]
+
+export default function PricingSection() {
   return (
-    <section className="relative py-24">
+    <section id="pricing" className="relative py-28 bg-neo-black text-neo-white border-t-8 border-b-8 border-neo-orange overflow-hidden">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Choose Your Plan
-          </h2>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            Start free and upgrade when you need more power
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-16">
+          <div>
+            <p className="text-xs uppercase tracking-[0.5em]">Test Laboratory</p>
+            <h2 className="mt-4 font-display text-[clamp(2.5rem,5vw,4.5rem)] uppercase leading-none">
+              Pick a plan and wrap it in hazard tape
+            </h2>
+          </div>
+          <p className="text-base md:text-lg text-white/80 max-w-xl">
+            We&apos;re still calling this a TEST ONLY program, but the ribbons are here,
+            the AI builder is alive, and the launcher is hungry for experiments.
           </p>
         </div>
-        <div className="relative pricing-container grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch" style={{ minHeight: '500px', perspective: '1200px', overflow: 'hidden' }}>
-          {/* Hazard tape overlays - wrapping around cards seamlessly */}
-          {/* Tapes behind cards (z-index: 5) */}
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '5%', left: '-25%', transform: 'rotate(-30deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '18%', left: '-25%', transform: 'rotate(20deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '32%', left: '-25%', transform: 'rotate(-28deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '48%', left: '-25%', transform: 'rotate(22deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '62%', left: '-25%', transform: 'rotate(-26deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '78%', left: '-25%', transform: 'rotate(18deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '10%', right: '-25%', transform: 'rotate(30deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '25%', right: '-25%', transform: 'rotate(-24deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '40%', right: '-25%', transform: 'rotate(26deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '55%', right: '-25%', transform: 'rotate(-20deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '70%', right: '-25%', transform: 'rotate(24deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-behind" style={{ top: '85%', right: '-25%', transform: 'rotate(-22deg) translateZ(0)' }} />
-          
-          {/* Tapes in front of cards (z-index: 15) */}
-          <div className="hazard-tape hazard-tape-front" style={{ top: '12%', left: '-25%', transform: 'rotate(-25deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '28%', left: '-25%', transform: 'rotate(24deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '45%', left: '-25%', transform: 'rotate(-30deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '60%', left: '-25%', transform: 'rotate(19deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '75%', left: '-25%', transform: 'rotate(-27deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '15%', right: '-25%', transform: 'rotate(27deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '32%', right: '-25%', transform: 'rotate(-23deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '50%', right: '-25%', transform: 'rotate(25deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '65%', right: '-25%', transform: 'rotate(-21deg) translateZ(0)' }} />
-          <div className="hazard-tape hazard-tape-front" style={{ top: '80%', right: '-25%', transform: 'rotate(23deg) translateZ(0)' }} />
-          
-          {/* Test Only sign - centered over the pricing cards */}
-          <div className="test-only-sign" style={{ top: '45%' }}>
-            TEST ONLY
-          </div>
 
-          {plans.map((plan, index) => (
+        <div className="relative pricing-container grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+          {hazardTapes.map((tape, idx) => (
+            <div key={idx} className={tape.className} style={tape.style} />
+          ))}
+
+          <div className="test-only-sign" style={{ zIndex: 70 }}>TEST ONLY</div>
+
+          {plans.map((plan) => (
             <div
-              key={index}
-              role="button"
-              tabIndex={0}
-              aria-label={`Select ${plan.name} plan`}
-              className={`relative p-8 rounded-2xl glass card cursor-pointer group transition-all duration-300 focus:outline-none 
-                border border-white/10 hover:border-white/30 
-                flex flex-col h-full
-              `}
-              style={{ zIndex: 10 }}
+              key={plan.name}
+              className={`relative border-4 border-neo-black bg-neo-white text-neo-black rounded-[32px] p-8 shadow-neo flex flex-col clip-corner ${
+                plan.highlight ? 'bg-neo-accent/40' : ''
+              }`}
+              style={{ zIndex: 50 }}
             >
-              {plan.popular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                  <div className="badge shadow-lg">
-                    Most Popular
-                  </div>
+              {plan.highlight && (
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                  <div className="neo-tag text-[0.6rem]">MOST LOVED</div>
                 </div>
               )}
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-cosmic-purple-100 transition-colors">{plan.name}</h3>
-                <div className="flex items-baseline justify-center mb-2">
-                  <span className="text-4xl font-bold text-gradient">{plan.price}</span>
-                  <span className="text-white/70 ml-2">/{plan.period}</span>
+
+              <div className="mb-6">
+                <p className="text-xs uppercase tracking-[0.4em]">{plan.name}</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display text-5xl">{plan.price}</span>
+                  <span className="text-sm uppercase tracking-[0.3em]">/{plan.period}</span>
                 </div>
+                <p className="mt-3 text-sm text-neo-black/70">
+                  {plan.note}
+                </p>
               </div>
+
               <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-center text-white/80">
-                    <span className="text-cosmic-purple-100 mr-2">✓</span>
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3 text-sm">
+                    <span className="w-2 h-2 bg-neo-black rounded-full" />
                     {feature}
                   </li>
                 ))}
               </ul>
+
               <button
                 type="button"
-                aria-label={`CTA ${plan.name}`}
-                onClick={() => void 0}
-                className={`w-full btn ${plan.popular ? 'btn-primary btn-cta' : 'btn-outline btn-cta-secondary'} btn-lg mt-auto`}
+                className={`btn btn-lg w-full ${plan.highlight ? 'btn-primary' : 'btn-outline'}`}
               >
                 {plan.name === 'Free' ? 'Download Free' : `Start ${plan.name}`}
               </button>

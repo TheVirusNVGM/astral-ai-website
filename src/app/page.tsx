@@ -7,11 +7,9 @@ import Footer from '@/components/Footer'
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-cosmic font-inter">
-      {/* Cosmic background with stars and particles */}
+    <main className="relative min-h-screen overflow-hidden font-body text-[#f7ecff]">
       <CosmicBackground />
       
-      {/* Main content */}
       <div className="relative z-10">
         <Header />
         <HeroSection />

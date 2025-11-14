@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { useAuth } from '@/lib/AuthContext'
 import { supabase } from '@/lib/supabase'
 import AuthModal from './AuthModal'
@@ -123,42 +122,61 @@ export default function Header() {
 
   return (
     <>
-      <header className="relative z-50 glass border-b border-white/10">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden animate-glow-pulse ring-1 ring-white/10">
-                <Image
-                  src="/logo.png"
-                  alt="ASTRAL-AI Logo"
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+      <header className="relative z-50 border-b-4 border-neo-black/70 bg-[#080014]/85 backdrop-blur-xl text-[#f7ecff]">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h1 className="text-xl font-bold text-white">ASTRAL-AI</h1>
-                <p className="text-xs text-cosmic-purple-50/80">Minecraft Launcher</p>
+                <p className="text-[0.6rem] uppercase tracking-[0.5em] font-semibold">
+                  Astral launch lab
+                </p>
+                <p className="font-heavy text-3xl md:text-4xl tracking-tight leading-none">
+                  ASTRAL.AI
+                </p>
               </div>
+              <span className="hidden md:inline-flex neo-pill text-[0.55rem] bg-neo-accent">
+                TEST ONLY
+              </span>
             </div>
-            <nav className="flex items-center space-x-3">
+
+            <nav className="flex flex-wrap items-center gap-5 uppercase text-xs tracking-[0.35em] font-semibold text-white/80">
+              <a href="#hero" className="transition-colors hover:text-neo-accent">
+                Overview
+              </a>
+              <a href="#toolkit" className="transition-colors hover:text-neo-accent">
+                Toolkit
+              </a>
+              <a href="#pricing" className="transition-colors hover:text-neo-accent">
+                Plans
+              </a>
+              <a href="#contact" className="transition-colors hover:text-neo-accent">
+                Contact
+              </a>
+            </nav>
+
+            <div className="flex items-center gap-3">
               {loading ? (
-                <div className="w-8 h-8 border-2 border-cosmic-purple-200 border-t-transparent rounded-full animate-spin" />
+                <div className="w-9 h-9 border-4 border-neo-black border-t-transparent rounded-full animate-spin" />
               ) : user ? (
-                <div className="flex items-center space-x-3">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-white font-semibold">{user.name}</p>
-                    <p className="text-cosmic-purple-100 text-sm capitalize">{user.subscription_tier}</p>
+                <div className="flex items-center gap-3">
+                  <div className="hidden sm:flex flex-col items-end text-right leading-tight">
+                    <p className="font-semibold uppercase tracking-[0.2em] text-xs">
+                      {user.name}
+                    </p>
+                    <p className="text-[0.65rem] uppercase tracking-[0.3em] text-neo-black/70">
+                      {user.subscription_tier}
+                    </p>
                   </div>
+
                   <div className="relative">
                     <button
                       onClick={() => setIsFriendsDropdownOpen(!isFriendsDropdownOpen)}
-                      className="btn btn-outline btn-sm flex items-center gap-2 relative"
+                      className="btn btn-outline btn-sm flex items-center gap-2"
                     >
                       <span>👥</span>
-                      <span>Friends</span>
+                      Friends
                       {friendRequestCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                        <span className="absolute -top-2 -right-2 bg-neo-orange text-neo-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center">
                           {friendRequestCount}
                         </span>
                       )}
@@ -168,15 +186,16 @@ export default function Header() {
                       onClose={() => setIsFriendsDropdownOpen(false)}
                     />
                   </div>
+
                   <button
                     onClick={() => setIsTestKeyModalOpen(true)}
                     className="btn btn-ghost btn-sm"
                   >
-                    Test
+                    Test Key
                   </button>
                   <button
                     onClick={() => signOut()}
-                    className="btn btn-ghost btn-sm"
+                    className="btn btn-primary btn-sm"
                   >
                     Sign Out
                   </button>
@@ -186,10 +205,10 @@ export default function Header() {
                   onClick={handleGetStarted}
                   className="btn btn-primary btn-md"
                 >
-                  Get Started
+                  Get Access
                 </button>
               )}
-            </nav>
+            </div>
           </div>
         </div>
       </header>
