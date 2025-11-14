@@ -295,53 +295,58 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
         initial={{ opacity: 0, y: -10, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -10, scale: 0.95 }}
-        className="absolute top-full right-0 mt-2 w-80 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl backdrop-blur-sm z-50"
+        className="absolute top-full right-0 mt-2 w-80 border-4 border-neo-black bg-[#1a0034] shadow-neo-lg rounded-[24px] clip-corner relative overflow-hidden z-50"
       >
+        {/* Background gradient */}
+        <div className="absolute inset-0 opacity-30" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(117, 61, 255, 0.3), transparent 70%)' }} />
+        
         {/* Header */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="relative p-4 border-b-4 border-neo-black/50">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-white font-semibold">👥 Friends</h3>
+            <h3 className="text-white font-heavy uppercase tracking-tight text-sm">👥 Friends</h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white text-xl"
+              className="w-8 h-8 flex items-center justify-center border-2 border-neo-black bg-white/10 hover:bg-white/20 transition-all rounded-lg text-white"
             >
-              ×
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
           
           {/* Tabs */}
-          <div className="flex space-x-1 bg-gray-800 rounded-lg p-1">
+          <div className="flex space-x-2 bg-white/5 border-2 border-neo-black rounded-lg p-1">
             <button
               onClick={() => setActiveTab('friends')}
-              className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-1.5 rounded-md text-xs font-heavy uppercase tracking-wider transition-all ${
                 activeTab === 'friends'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-neo-orange text-white shadow-neo-sm'
+                  : 'text-white/60 hover:text-white bg-transparent'
               }`}
             >
               Friends ({friends.length})
             </button>
             <button
               onClick={() => setActiveTab('requests')}
-              className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors relative ${
+              className={`flex-1 px-3 py-1.5 rounded-md text-xs font-heavy uppercase tracking-wider transition-all relative ${
                 activeTab === 'requests'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-neo-orange text-white shadow-neo-sm'
+                  : 'text-white/60 hover:text-white bg-transparent'
               }`}
             >
               Requests ({friendRequests.length})
               {friendRequests.length > 0 && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neo-orange border-2 border-neo-black rounded-full" />
               )}
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="max-h-96 overflow-y-auto">
+        <div className="relative max-h-96 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-4 border-neo-orange border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <>
@@ -350,45 +355,45 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                   {friends.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="text-3xl mb-2">😔</div>
-                      <p className="text-gray-400 text-sm">No friends yet</p>
+                      <p className="text-white/60 text-xs uppercase tracking-wider font-semibold">No friends yet</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {friends.map((friend) => (
                         <div 
                           key={friend.id} 
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition-colors relative"
+                          className="flex items-center space-x-3 p-3 rounded-lg border-2 border-transparent hover:border-neo-black/30 hover:bg-white/5 transition-all relative"
                           onContextMenu={(e) => {
                             e.preventDefault()
                             setFriendActionsVisible(friendActionsVisible === friend.id ? null : friend.id)
                           }}
                         >
                           <div className="relative">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold text-sm">
+                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center border-2 border-neo-black shadow-neo-sm">
+                              <span className="text-white font-heavy text-xs">
                                 {(friend.custom_username || friend.name).charAt(0).toUpperCase()}
                               </span>
                             </div>
-                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-gray-900 rounded-full ${
-                              friend.status === 'online' ? 'bg-green-500' : 
-                              friend.status === 'away' ? 'bg-yellow-500' : 'bg-gray-500'
+                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-neo-black rounded-full ${
+                              friend.status === 'online' ? 'bg-green-400' : 
+                              friend.status === 'away' ? 'bg-yellow-400' : 'bg-white/40'
                             }`} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-white font-medium text-sm truncate">
+                            <p className="text-white font-semibold text-xs truncate uppercase tracking-tight">
                               {friend.custom_username || friend.name}
                             </p>
                             <div className="flex items-center space-x-1">
-                              <span className={`text-xs capitalize ${
+                              <span className={`text-[10px] uppercase tracking-wider font-semibold ${
                                 friend.status === 'online' ? 'text-green-400' : 
-                                friend.status === 'away' ? 'text-yellow-400' : 'text-gray-400'
+                                friend.status === 'away' ? 'text-yellow-400' : 'text-white/50'
                               }`}>
                                 {friend.status}
                               </span>
                               {friend.is_playing && (
                                 <>
-                                  <span className="text-gray-400 text-xs">•</span>
-                                  <span className="text-blue-400 text-xs">Playing</span>
+                                  <span className="text-white/30 text-[10px]">•</span>
+                                  <span className="text-purple-400 text-[10px] uppercase tracking-wider font-semibold">Playing</span>
                                 </>
                               )}
                             </div>
@@ -401,14 +406,14 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                                 setFriendActionsVisible(null)
                                 handleRemoveFriend(friend.id, friend.custom_username || friend.name)
                               }}
-                              className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors font-medium"
+                              className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-[10px] uppercase tracking-wider rounded border-2 border-neo-black shadow-neo-sm transition-all font-heavy"
                             >
                               ✕ Remove
                             </button>
                           ) : (
                             <button 
                               onClick={() => setFriendActionsVisible(friend.id)}
-                              className="text-gray-400 hover:text-white text-lg p-1 rounded transition-colors"
+                              className="text-white/40 hover:text-white text-lg p-1 rounded transition-colors"
                             >
                               ⋮
                             </button>
@@ -425,24 +430,24 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                   {friendRequests.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="text-3xl mb-2">📭</div>
-                      <p className="text-gray-400 text-sm">No pending requests</p>
+                      <p className="text-white/60 text-xs uppercase tracking-wider font-semibold">No pending requests</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {friendRequests.map((request) => (
-                        <div key={request.id} className="p-3 rounded-lg bg-gray-800">
+                        <div key={request.id} className="p-3 rounded-lg border-2 border-neo-black/30 bg-white/5">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-2">
-                              <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-semibold text-xs">
+                              <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center border-2 border-neo-black shadow-neo-sm">
+                                <span className="text-white font-heavy text-xs">
                                   {(request.sender?.custom_username || request.sender?.name || 'U').charAt(0).toUpperCase()}
                                 </span>
                               </div>
                               <div>
-                                <p className="text-white font-medium text-sm">
+                                <p className="text-white font-semibold text-xs uppercase tracking-tight">
                                   {request.sender?.custom_username || request.sender?.name || 'Unknown User'}
                                 </p>
-                                <p className="text-gray-400 text-xs">
+                                <p className="text-white/50 text-[10px] uppercase tracking-wider">
                                   {new Date(request.created_at).toLocaleDateString()}
                                 </p>
                               </div>
@@ -451,13 +456,13 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
                           <div className="flex space-x-2">
                             <button
                               onClick={() => handleFriendRequest(request.id, 'accept')}
-                              className="flex-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md font-medium transition-colors"
+                              className="flex-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-[10px] uppercase tracking-wider rounded-md border-2 border-neo-black shadow-neo-sm transition-all font-heavy"
                             >
                               Accept
                             </button>
                             <button
                               onClick={() => handleFriendRequest(request.id, 'decline')}
-                              className="flex-1 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded-md font-medium transition-colors"
+                              className="flex-1 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-[10px] uppercase tracking-wider rounded-md border-2 border-neo-black shadow-neo-sm transition-all font-heavy"
                             >
                               Decline
                             </button>
@@ -473,10 +478,10 @@ export default function FriendsDropdown({ isOpen, onClose }: FriendsDropdownProp
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-gray-700">
+        <div className="relative p-3 border-t-4 border-neo-black/50">
           <button 
             onClick={() => setIsFindFriendsModalOpen(true)}
-            className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg font-medium transition-colors"
+            className="w-full px-3 py-2 bg-neo-orange hover:bg-neo-orange/90 text-white text-xs uppercase tracking-wider rounded-lg border-2 border-neo-black shadow-neo-sm transition-all font-heavy"
           >
             🔍 Find Friends
           </button>
