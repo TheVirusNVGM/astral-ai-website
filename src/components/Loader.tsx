@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Loader() {
   const [isLoading, setIsLoading] = useState(true)
-  const [shouldExit, setShouldExit] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -25,11 +24,7 @@ export default function Loader() {
       
       // Show loader for 2 seconds, then trigger exit animation
       const showTimer = setTimeout(() => {
-        setShouldExit(true)
-        // After exit animation starts, remove from DOM
-        setTimeout(() => {
-          setIsLoading(false)
-        }, 800) // Match exit animation duration
+        setIsLoading(false) // This will trigger exit animation in AnimatePresence
       }, 2000) // 2 seconds visible before exit animation starts
 
       return () => clearTimeout(showTimer)
@@ -45,8 +40,7 @@ export default function Loader() {
         <motion.div
           key="loader"
           initial={{ opacity: 1, y: 0 }}
-          animate={shouldExit ? { y: '-100%' } : { y: 0 }}
-          transition={{ duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] }}
+          exit={{ y: '-100%', transition: { duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] } }}
           className="fixed inset-0 bg-[#03010f] z-[10000] flex flex-col items-center justify-center"
         >
           {/* Видео с крутящимся кубом */}
