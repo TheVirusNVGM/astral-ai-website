@@ -35,7 +35,7 @@ export default function HeroSection() {
               <span className="w-2 h-2 bg-neo-black rounded-full" />
               Astral Build Lab
             </div>
-            <h1 className="mt-6 font-display text-[clamp(2.6rem,6vw,4.7rem)] leading-[0.9] uppercase tracking-tight">
+            <h1 className="mt-6 font-display text-[clamp(2.3rem,5.3vw,4.1rem)] leading-[0.95] uppercase tracking-tight">
               We weaponize AI builder for Minecraft misfits
             </h1>
             <p className="mt-6 text-lg md:text-xl text-[#e7d9ff] max-w-2xl">

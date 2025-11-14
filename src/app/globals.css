@@ -138,12 +138,12 @@ textarea {
 .btn-test-key {
   background: rgba(255, 255, 255, 0.08);
   color: #f2e7ff;
-  border: var(--border-thick) solid #7fff00 !important;
-  box-shadow: 6px 6px 0px 0px #7fff00;
+  border: var(--border-thick) solid rgba(255, 58, 203, 0.6) !important;
+  box-shadow: 6px 6px 0px 0px rgba(255, 58, 203, 0.4);
 }
 
 .btn-test-key:hover {
-  box-shadow: 10px 10px 0px 0px #7fff00;
+  box-shadow: 10px 10px 0px 0px rgba(255, 58, 203, 0.5);
 }
 
 .btn-ghost {
