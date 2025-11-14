@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import DownloadButton from './DownloadButton'
 import dynamic from 'next/dynamic'
 
@@ -21,9 +22,29 @@ const marqueeItems = [
 ]
 
 export default function HeroSection() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 2.0 // Ускоряем в 2 раза
+    }
+  }, [])
+
   return (
     <section id="hero" className="relative py-20 lg:py-28 border-b-4 border-neo-black/70 overflow-hidden text-[#f7ecff]">
       <div className="absolute inset-0 pointer-events-none">
+        {/* Видео с крутящимся кубом */}
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[400px] md:h-[400px] mix-blend-screen opacity-60"
+          style={{ mixBlendMode: 'screen' }}
+        >
+          <source src="/2.webm" type="video/webm" />
+        </video>
         <div className="absolute -top-32 right-6 w-64 h-64 border-4 border-neo-black/60 rounded-full bg-neo-blue/30 blur-3xl" />
         <div className="absolute bottom-0 left-0 w-72 h-72 border-4 border-neo-black/40 bg-neo-orange/20 rotate-6 blur-2xl" />
       </div>
