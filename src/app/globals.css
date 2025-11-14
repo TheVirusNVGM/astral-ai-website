@@ -89,18 +89,47 @@ textarea {
   box-shadow: 4px 4px 0px 0px var(--neo-black);
 }
 
-.btn-lg { padding: 1rem 2.75rem; font-size: 1.1rem; }
+.btn-lg { 
+  padding: 1.25rem 3rem; 
+  font-size: 1.1rem; 
+  border-radius: 16px !important;
+  position: relative;
+}
 .btn-md { padding: 0.85rem 2rem; }
 .btn-sm { padding: 0.55rem 1.5rem; font-size: 0.85rem; }
 
 .btn-primary {
   background: var(--neo-orange);
   color: var(--neo-white);
+  box-shadow: 
+    6px 6px 0px 0px var(--neo-black),
+    0 0 20px rgba(255, 58, 203, 0.4),
+    inset 0 0 20px rgba(255, 58, 203, 0.1);
+}
+
+.btn-primary:hover {
+  box-shadow: 
+    10px 10px 0px 0px var(--neo-black),
+    0 0 35px rgba(255, 58, 203, 0.7),
+    0 0 60px rgba(255, 58, 203, 0.4),
+    inset 0 0 30px rgba(255, 58, 203, 0.2);
 }
 
 .btn-outline {
   background: rgba(255, 255, 255, 0.08);
   color: #f2e7ff;
+  box-shadow: 
+    6px 6px 0px 0px var(--neo-black),
+    0 0 15px rgba(116, 76, 255, 0.3),
+    inset 0 0 15px rgba(116, 76, 255, 0.1);
+}
+
+.btn-outline:hover {
+  box-shadow: 
+    10px 10px 0px 0px var(--neo-black),
+    0 0 30px rgba(116, 76, 255, 0.6),
+    0 0 50px rgba(116, 76, 255, 0.3),
+    inset 0 0 25px rgba(116, 76, 255, 0.15);
 }
 
 .btn-ghost {

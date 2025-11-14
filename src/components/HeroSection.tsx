@@ -35,7 +35,7 @@ export default function HeroSection() {
               <span className="w-2 h-2 bg-neo-black rounded-full" />
               Astral Build Lab
             </div>
-            <h1 className="mt-6 font-display text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] uppercase tracking-tight">
+            <h1 className="mt-6 font-display text-[clamp(2.6rem,6vw,4.7rem)] leading-[0.9] uppercase tracking-tight">
               We weaponize AI builder for Minecraft misfits
             </h1>
             <p className="mt-6 text-lg md:text-xl text-[#e7d9ff] max-w-2xl">
@@ -72,11 +72,11 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((stat) => (
             <div 
               key={stat.label}
-              className="border-4 border-neo-black/80 bg-[#16002d]/80 p-4 shadow-neo-sm clip-corner backdrop-blur"
+              className="border-4 border-neo-black/80 bg-[#16002d]/80 p-4 shadow-neo-sm backdrop-blur rounded-xl"
             >
               <p className="font-heavy text-3xl text-neo-white">{stat.value}</p>
               <p className="text-[0.7rem] uppercase tracking-[0.35em] text-white/70">{stat.label}</p>
@@ -87,7 +87,7 @@ export default function HeroSection() {
           ))}
         </div>
 
-        <div className="relative mt-16">
+        <div className="relative mt-24">
           <div className="neo-marquee neo-marquee-tilt w-screen -translate-x-1/2 left-1/2 relative">
             <div className="neo-marquee-content">
               {marqueeItems.map((item) => (

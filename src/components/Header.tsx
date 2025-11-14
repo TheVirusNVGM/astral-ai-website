@@ -189,13 +189,13 @@ export default function Header() {
 
                   <button
                     onClick={() => setIsTestKeyModalOpen(true)}
-                    className="btn btn-ghost btn-sm"
+                    className="btn btn-outline btn-sm"
                   >
                     Test Key
                   </button>
                   <button
                     onClick={() => signOut()}
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-outline btn-sm"
                   >
                     Sign Out
                   </button>
