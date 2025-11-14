@@ -189,7 +189,7 @@ export default function Header() {
 
                   <button
                     onClick={() => setIsTestKeyModalOpen(true)}
-                    className="btn btn-outline btn-sm"
+                    className="btn btn-test-key btn-sm"
                   >
                     Test Key
                   </button>
@@ -203,7 +203,7 @@ export default function Header() {
               ) : (
                 <button 
                   onClick={handleGetStarted}
-                  className="btn btn-primary btn-md"
+                  className="btn btn-primary-nav btn-md"
                 >
                   Get Access
                 </button>
