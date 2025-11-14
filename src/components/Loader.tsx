@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Loader() {
   const [isLoading, setIsLoading] = useState(true)
+  const [isExiting, setIsExiting] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -18,16 +19,34 @@ export default function Loader() {
       localStorage.setItem('astral-has-visited', 'true')
       
       // Set video playback rate to 2x
-      if (videoRef.current) {
-        videoRef.current.playbackRate = 2.0
+      const setPlaybackRate = () => {
+        if (videoRef.current) {
+          videoRef.current.playbackRate = 2.0
+        }
+      }
+      
+      // Try to set playback rate immediately and after video loads
+      setPlaybackRate()
+      const video = videoRef.current
+      if (video) {
+        video.addEventListener('loadedmetadata', setPlaybackRate)
       }
       
       // Show loader for 2 seconds, then trigger exit animation
       const showTimer = setTimeout(() => {
-        setIsLoading(false) // This will trigger exit animation in AnimatePresence
+        setIsExiting(true)
+        // Remove from DOM after exit animation completes
+        setTimeout(() => {
+          setIsLoading(false)
+        }, 800) // Match exit animation duration
       }, 2000) // 2 seconds visible before exit animation starts
 
-      return () => clearTimeout(showTimer)
+      return () => {
+        clearTimeout(showTimer)
+        if (video) {
+          video.removeEventListener('loadedmetadata', setPlaybackRate)
+        }
+      }
     } else {
       // Already visited, skip loader
       setIsLoading(false)
@@ -40,8 +59,8 @@ export default function Loader() {
         <motion.div
           key="loader"
           initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ y: '-100%', opacity: 0, transition: { duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] } }}
+          animate={isExiting ? { y: '-100%', opacity: 0 } : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] }}
           className="fixed inset-0 bg-[#03010f] z-[10000] flex flex-col items-center justify-center"
         >
           {/* Видео с крутящимся кубом */}
