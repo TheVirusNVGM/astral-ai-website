@@ -22,10 +22,10 @@ export default function Loader() {
         videoRef.current.playbackRate = 2.0
       }
       
-      // Simulate loading time (2 seconds)
+      // Simulate loading time (2 seconds) + delay before exit animation
       const timer = setTimeout(() => {
         setIsLoading(false)
-      }, 2000)
+      }, 4000) // 2 seconds visible + 2 seconds for exit animation
 
       return () => clearTimeout(timer)
     } else {
