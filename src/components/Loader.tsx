@@ -35,12 +35,13 @@ export default function Loader() {
   }, [])
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {isLoading && (
         <motion.div
           key="loader"
           initial={{ opacity: 1, y: 0 }}
-          exit={{ y: '-100%', transition: { duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] } }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ y: '-100%', opacity: 0, transition: { duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] } }}
           className="fixed inset-0 bg-[#03010f] z-[10000] flex flex-col items-center justify-center"
         >
           {/* Видео с крутящимся кубом */}
