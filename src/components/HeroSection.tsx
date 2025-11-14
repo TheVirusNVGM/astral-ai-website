@@ -40,7 +40,7 @@ export default function HeroSection() {
           loop
           muted
           playsInline
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[400px] md:h-[400px] mix-blend-screen opacity-60"
+          className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[300px] h-[300px] md:w-[400px] md:h-[400px] mix-blend-screen opacity-60"
           style={{ mixBlendMode: 'screen' }}
         >
           <source src="/2.webm" type="video/webm" />
