@@ -134,9 +134,6 @@ export default function Header() {
                   ASTRAL.AI
                 </p>
               </div>
-              <span className="hidden md:inline-flex btn btn-outline btn-sm text-[0.55rem]">
-                TEST ONLY
-              </span>
             </div>
 
             <nav className="flex flex-wrap items-center gap-5 uppercase text-xs tracking-[0.35em] font-semibold text-white/80">
@@ -189,7 +186,7 @@ export default function Header() {
 
                   <button
                     onClick={() => setIsTestKeyModalOpen(true)}
-                    className="btn btn-outline btn-sm"
+                    className="btn btn-test-key btn-sm"
                   >
                     Test Key
                   </button>
