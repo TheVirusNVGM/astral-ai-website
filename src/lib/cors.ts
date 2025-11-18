@@ -6,9 +6,10 @@
 const ALLOWED_ORIGINS = [
   'https://astral-ai.online',
   'https://www.astral-ai.online',
-  // Add localhost for development
+  // Localhost for development AND production testing
   'http://localhost:3000',
   'http://localhost:1420', // Tauri dev server
+  'http://localhost:5173', // Vite dev server
   'http://localhost:5174', // Vite dev server (launcher)
   'tauri://localhost', // Tauri app protocol
   'http://tauri.localhost', // Tauri app build protocol
@@ -18,14 +19,14 @@ const ALLOWED_ORIGINS = [
  * Get CORS headers with proper origin validation
  */
 export function getCorsHeaders(origin?: string): Record<string, string> {
-  // For development, allow localhost
-  const isDev = process.env.NODE_ENV === 'development'
-  const isAllowed = origin && (ALLOWED_ORIGINS.includes(origin) || (isDev && origin.includes('localhost')))
+  // Allow localhost even in production for local launcher testing
+  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin)
   
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : 'https://www.astral-ai.online',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin', // Important for proper caching with different origins
   }
