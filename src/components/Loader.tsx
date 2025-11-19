@@ -4,34 +4,16 @@ import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 export default function Loader() {
-  // Check localStorage synchronously before first render to prevent flash
-  const [isVisible, setIsVisible] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !localStorage.getItem('astral-has-visited')
-  })
+  // Always start visible for now, user reported it "doesn't work" (likely due to localStorage check)
+  const [isVisible, setIsVisible] = useState(true)
   const [shouldExit, setShouldExit] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    // Check if user has visited before
-    if (typeof window === 'undefined') {
-      setIsVisible(false)
-      return
-    }
-    
-    const hasVisited = localStorage.getItem('astral-has-visited')
-    
-    if (hasVisited) {
-      // Already visited, skip loader immediately
-      setIsVisible(false)
-      return
-    }
-    
-    // First visit - show loader
-    // Mark as visited immediately
-    localStorage.setItem('astral-has-visited', 'true')
-    
+    // Ensure we are on client
+    if (typeof window === 'undefined') return
+
     // Set video playback rate to 2x
     const setPlaybackRate = () => {
       if (videoRef.current) {

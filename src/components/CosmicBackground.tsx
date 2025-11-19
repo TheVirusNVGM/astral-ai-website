@@ -9,6 +9,7 @@ interface Star {
   y: number
   size: 'tiny' | 'small' | 'medium' | 'large'
   delay: number
+  duration: number
   bright?: boolean
 }
 
@@ -17,6 +18,9 @@ interface ShootingStar {
   left: number
   top: number
   delay: number
+  duration: number
+  angle: number
+  length: number
 }
 
 const blobs: { id: number; className: string; style: CSSProperties }[] = [
@@ -31,27 +35,38 @@ export default function CosmicBackground() {
 
   useEffect(() => {
     const generatedStars: Star[] = []
-    // Optimized star count for performance
-    for (let i = 0; i < 200; i++) {
+    // Increased star count for a denser, deeper field
+    for (let i = 0; i < 400; i++) {
+      const rand = Math.random()
+      let size: 'tiny' | 'small' | 'medium' | 'large' = 'tiny'
+      
+      if (rand > 0.97) size = 'large'
+      else if (rand > 0.9) size = 'medium'
+      else if (rand > 0.7) size = 'small'
+      
       generatedStars.push({
         id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
-        size: Math.random() > 0.75 ? 'large' : Math.random() > 0.5 ? 'medium' : Math.random() > 0.25 ? 'small' : 'tiny',
-        delay: Math.random() * 8,
-        bright: Math.random() > 0.85
+        size,
+        delay: Math.random() * 5,
+        duration: 3 + Math.random() * 4, // Varying duration for more natural feel
+        bright: Math.random() > 0.9
       })
     }
     setStars(generatedStars)
 
-    // More shooting stars with different trajectories
+    // Shooting stars with more variety
     const streaks: ShootingStar[] = []
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 8; i++) {
       streaks.push({
         id: i,
         left: Math.random() * 100,
-        top: Math.random() * 80 - 20, // Начинаются выше экрана
-        delay: Math.random() * 15
+        top: Math.random() * 60, // Mostly top half
+        delay: Math.random() * 20, // Spread out start times
+        duration: 2 + Math.random() * 3, // Random duration between 2-5s
+        angle: 35 + Math.random() * 20, // Angle between 35 and 55 degrees
+        length: 100 + Math.random() * 150 // Random length
       })
     }
     setShootingStars(streaks)
@@ -81,18 +96,24 @@ export default function CosmicBackground() {
       <div className="absolute inset-0">
         {stars.map((star) => {
           const sizeClass =
-            star.size === 'large' ? 'w-1 h-1' :
-            star.size === 'medium' ? 'w-0.5 h-0.5' :
-            star.size === 'small' ? 'w-[2px] h-[2px]' : 'w-px h-px'
+            star.size === 'large' ? 'w-1.5 h-1.5' :
+            star.size === 'medium' ? 'w-1 h-1' :
+            star.size === 'small' ? 'w-[2px] h-[2px]' : 'w-[1px] h-[1px]'
+            
+          const opacityClass = 
+            star.size === 'tiny' ? 'opacity-40' : 
+            star.size === 'small' ? 'opacity-60' : 
+            'opacity-90'
 
           return (
             <div
               key={star.id}
-              className={`absolute ${sizeClass} ${star.bright ? 'star-bright' : 'star-twinkle'}`}
+              className={`absolute rounded-full bg-white ${sizeClass} ${opacityClass} ${star.bright ? 'star-bright' : 'star-twinkle'}`}
               style={{
                 left: `${star.x}%`,
                 top: `${star.y}%`,
-                animationDelay: `${star.delay}s`
+                animationDelay: `${star.delay}s`,
+                animationDuration: `${star.duration}s`
               }}
             />
           )
@@ -108,9 +129,15 @@ export default function CosmicBackground() {
               left: `${streak.left}%`,
               top: `${streak.top}%`,
               animationDelay: `${streak.delay}s`,
-              transformOrigin: 'top left'
-            }}
-          />
+              animationDuration: `${streak.duration}s`,
+              '--star-angle': `${streak.angle}deg`,
+              '--star-length': `${streak.length}px`,
+              '--star-color': index % 3 === 0 ? '#ff3acb' : index % 2 === 0 ? '#4b5dff' : '#ffffff'
+            } as React.CSSProperties}
+          >
+             {/* Glowing head */}
+             <div className="absolute bottom-0 left-1/2 w-[4px] h-[4px] bg-white rounded-full shadow-[0_0_10px_2px_rgba(255,255,255,0.8)] transform -translate-x-1/2 translate-y-1/2" />
+          </div>
         ))}
       </div>
 

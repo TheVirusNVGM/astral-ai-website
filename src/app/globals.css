@@ -13,6 +13,26 @@
   --border-thick: 4px;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--neo-sand);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neo-purple), var(--neo-accent));
+  border-radius: 5px;
+  border: 2px solid var(--neo-sand);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--neo-accent), var(--neo-orange));
+}
+
 html,
 body {
   background: radial-gradient(circle at 20% 20%, #2c0057 0%, #0b001c 55%, #03000c 100%);
@@ -251,6 +271,11 @@ textarea {
   animation: marquee 18s linear infinite;
 }
 
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 .neo-divider {
   border-top: 4px solid var(--neo-black);
   width: 100%;
@@ -292,66 +317,65 @@ textarea {
 }
 
 .star-twinkle {
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
-  border-radius: 999px;
-  animation: twinkle 4s ease-in-out infinite;
+  animation-name: twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
 }
 
 .star-bright {
-  background: radial-gradient(circle, rgba(255, 225, 255, 0.95) 0%, rgba(255, 255, 255, 0) 70%);
-  border-radius: 999px;
-  box-shadow: 0 0 10px rgba(255, 184, 255, 0.8);
-  animation: bright-twinkle 6s ease-in-out infinite;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8), 0 0 8px rgba(155, 125, 255, 0.4);
+  animation-name: bright-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes bright-twinkle {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); box-shadow: 0 0 4px rgba(255, 255, 255, 0.6); }
+  50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 12px rgba(155, 125, 255, 0.6); }
+}
+
 
 .shooting-star {
   position: absolute;
   width: 2px;
-  height: 120px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3) 40%, transparent);
+  height: var(--star-length, 120px);
+  background: linear-gradient(0deg, var(--star-color, rgba(255, 255, 255, 1)), rgba(255, 255, 255, 0.5) 10%, transparent);
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 4px rgba(117, 61, 255, 0.6));
-  animation: shooting-star 8s linear infinite;
+  animation: shooting-star var(--star-duration, 8s) linear infinite;
+  opacity: 0;
+  transform-origin: top center;
 }
 
-.shooting-star:nth-child(odd) {
-  width: 1.5px;
-  height: 80px;
-  animation-duration: 6s;
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 3px rgba(255, 58, 203, 0.5));
-}
-
-.shooting-star:nth-child(3n) {
-  width: 2.5px;
-  height: 150px;
-  animation-duration: 10s;
-  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) drop-shadow(0 0 6px rgba(75, 93, 255, 0.7));
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes float-wiggle {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  50% { transform: translate3d(20px, -30px, 0) rotate(6deg); }
-  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+/* Remove specific nth-child rules as we now control this via JS */
+.shooting-star:nth-child(odd), .shooting-star:nth-child(3n) {
+  /* Reset these to default or just rely on the base class + JS vars */
+  width: 2px;
+  animation-duration: inherit;
+  filter: inherit;
 }
 
 @keyframes shooting-star {
-  0% { 
-    transform: translate3d(0, 0, 0) rotate(45deg) scale(0.8); 
-    opacity: 0; 
+  0% {
+    transform: rotate(var(--star-angle, 45deg)) translateY(0) scale(0.8);
+    opacity: 0;
   }
-  3% { 
-    opacity: 1; 
+  5% {
+    opacity: 1;
+    transform: rotate(var(--star-angle, 45deg)) translateY(150px) scale(1);
   }
-  85% { 
-    opacity: 1; 
+  90% {
+    opacity: 1;
   }
-  100% { 
-    transform: translate3d(500px, -500px, 0) rotate(45deg) scale(1.2); 
-    opacity: 0; 
+  100% {
+    transform: rotate(var(--star-angle, 45deg)) translateY(150vh) scale(1.2);
+    opacity: 0;
   }
 }
 
