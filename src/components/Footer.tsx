@@ -1,5 +1,5 @@
 const socials = [
-  { label: 'Discord', href: '#' },
+  { label: 'Discord', href: 'https://discord.gg/zc2f6SMG26' },
   { label: 'Twitter', href: '#' },
   { label: 'GitHub', href: '#' }
 ]
